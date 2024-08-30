@@ -17,8 +17,8 @@ import seaborn as sns
 # Import my modules
 # sys.path.insert(0, '/home/vaillant/codes/projects/plot_CALIPSO_section/')
 from my_modules.standard_outputs import print_time
-from my_modules.readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon, \
-    split_granule_date
+from my_modules.readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon
+from my_modules.paths import split_granule_date
 from my_modules.figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
     CALIOPFigureMaker, remove_edges
 
@@ -27,6 +27,12 @@ FILL_VALUE_FLOAT = -9999.0
 
 
 class FigureMaker(CALIOPFigureMaker):
+    def __init__(self):
+        super().__init__()
+        self.fig_w = cm2in(17.7) # cm
+        self.fig_h = cm2in(6) # cm
+        self.axes_titlesize = 8
+        self.axes_title_pad = 1.14
 
     def set_max_detect_level(self, max_detect_level):
         self.max_detect_level = max_detect_level
@@ -84,7 +90,7 @@ class FigureMaker(CALIOPFigureMaker):
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
         if step:
-            plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)}$' % step, y=1.35)
+            plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)\ %s}$' % (step, VERSION_2D_McDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         else:
             if channel == '532_par':
                 title = "532\ nm\ parallel\ detection\ feature\ mask"
@@ -94,12 +100,12 @@ class FigureMaker(CALIOPFigureMaker):
                 title = "1064\ nm\ detection\ feature\ mask"
             else:
                 raise ValueError(f"Unknown channel = {channel}")
-            plt.title(r'$\mathbf{%s}$' % title, y=1.35)
+            plt.title(r'$\mathbf{%s\ %s}$' % (title, VERSION_2D_McDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
         cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
-        fontsize_clabel = 5
+        fontsize_clabel = 4
         cbar.ax.tick_params(axis='y', which='both', right=False, labelright=False)
         for j, lab in enumerate(clabels):
             cbar.ax.text(1.5, 1/(float(colorbins.size-1)*2) + j/float(colorbins.size-1), lab,
@@ -151,7 +157,7 @@ class FigureMaker(CALIOPFigureMaker):
             raise ValueError(f"Unknown channel = {channel}")
         plt.clim(1e-1, vmax)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)}$' % step, y=1.35)
+        plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)\ %s}$' % (step, VERSION_2D_McDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -226,12 +232,12 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask}$', y=1.35)
+        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_McDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
         cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
-        fontsize_clabel = 7
+        fontsize_clabel = 4
         cbar.ax.tick_params(axis='y', which='both', right=False, labelright=False)
         for j, lab in enumerate(clabels):
             cbar.ax.text(1.5, 1/(float(colorbins.size-1)*2) + j/float(colorbins.size-1), lab,
@@ -289,12 +295,12 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask}$', y=1.35)
+        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_McDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
         cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
-        fontsize_clabel = 7
+        fontsize_clabel = 4
         cbar.ax.tick_params(axis='y', which='both', right=False, labelright=False)
         for j, lab in enumerate(clabels):
             cbar.ax.text(1.5, 1/(float(colorbins.size-1)*2) + j/float(colorbins.size-1), lab,
@@ -377,12 +383,12 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, new_mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask}$', y=1.35)
+        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_McDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
         cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
-        fontsize_clabel = 5
+        fontsize_clabel = 4
         cbar.ax.tick_params(axis='y', which='both', right=False, labelright=False)
         for j, lab in enumerate(clabels):
             cbar.ax.text(1.5, 1/(float(colorbins.size-1)*2) + j/float(colorbins.size-1), lab,
@@ -403,19 +409,21 @@ if __name__ == '__main__':
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
     INDATA_FOLDER = "/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/out/data/"
-    GRANULE_DATE = "2006-06-25T06-58-31ZN_lon_-68.21_-68.62"
+    GRANULE_DATE = "2011-06-25T00-11-52ZN"
+    GRANULE_SECTION = "_lon_5.95_-150.07" # void if complete file
     VERSION_2D_McDA = "V1.0.2"
-    TYPE_2D_McDA = "Prototype"
+    TYPE_2D_McDA = "Release"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-    SLICE_START = -68.21 # profindex or longitude
-    SLICE_END = -68.62 # profindex or longitude
+    SLICE_START = 5.95 # profindex or longitude
+    SLICE_END = -150.07 # profindex or longitude
     EDGES_REMOVAL = 0 # number of 1/3-km prof to remove on both edges of plot
     MAX_DETECT_LEVEL = 5
     PLOT_ALL_STEPS = False
     INVERT_XAXIS = False
     YMIN = -2 # None
     YMAX = 20
-    FIGURES_PATH = "/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/out/figures/"
+    BROWSE_IMAGE_ASPECT_RATIO = True
+    FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     
     
@@ -425,7 +433,7 @@ if __name__ == '__main__':
     
     # Get filename and filepath
     filename_2d_mcda = f"CAL_LID_L2_2D_McDA-{TYPE_2D_McDA}-{VERSION_2D_McDA.replace('.', '-')}." \
-                       f"{GRANULE_DATE}.hdf"
+                       f"{GRANULE_DATE}{GRANULE_SECTION}.hdf"
     granule_date_dict = split_granule_date(GRANULE_DATE)
     hdffile = os.path.join(INDATA_FOLDER, f"2D_McDA.{VERSION_2D_McDA.replace('V', 'v')}",
                            str(granule_date_dict['year']),
@@ -503,6 +511,13 @@ if __name__ == '__main__':
     
     # Initialize instance of FigureMaker
     plot_fig = FigureMaker()
+    if BROWSE_IMAGE_ASPECT_RATIO:
+        plot_fig.fig_w = cm2in(16) # cm
+        plot_fig.fig_h = cm2in(8) # cm
+        plot_fig.adj_left = 0.08
+        plot_fig.adj_bottom = 0.11
+        plot_fig.adj_right = 0.87
+        plot_fig.adj_top = 0.81
     plot_fig.set_and_create_fig_folder(FIGURES_PATH, GRANULE_DATE, lon_granule[prof_min], lon_granule[prof_max])
     plot_fig.set_head_filename(GRANULE_DATE, lon_granule[prof_min], lon_granule[prof_max])
     plot_fig.set_edges_removal(EDGES_REMOVAL)

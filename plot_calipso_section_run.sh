@@ -7,8 +7,8 @@ plot_calipso_section () {
        jobname="plot_"$1"_"$3"_$4"
        echo -e "jobname=$jobname"
        sbatch --job-name=$jobname \
-              --error=./sbatch_out/${jobname}.e \
-              --output=./sbatch_out/${jobname}.o \
+              --error=./out/slurm/${jobname}.e \
+              --output=./out/slurm/${jobname}.o \
               --export=GRANULE_DATE="$1",SLICE_START_END_TYPE="$2",SLICE_START="$3",SLICE_END="$4",CASE_STUDY_NAME="$5" plot_calipso_section.sbatch
 }
 

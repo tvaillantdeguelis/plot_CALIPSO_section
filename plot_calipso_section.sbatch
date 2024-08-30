@@ -4,6 +4,7 @@
 #SBATCH --mem=4G
 
 # Activer Python virtual environment
+source ~/.zshrc
 mamba activate plot_CALIPSO_section_v1.0
 
 # Run program

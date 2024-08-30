@@ -14,10 +14,10 @@ import os
 import sys
 
 from my_modules.standard_outputs import print_time
-from my_modules.readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon, \
-    split_granule_date
+from my_modules.readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon
 from my_modules.figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
     CALIOPFigureMaker, remove_edges
+from my_modules.paths import split_granule_date
 
 
 class FigureMaker(CALIOPFigureMaker):
@@ -64,12 +64,12 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(f'PSC Composition {VERSION_CAL_LID_L2_PSCMask}', weight='bold', y=1.35)
+        plt.title(f'PSC Mask Composition {VERSION_CAL_LID_L2_PSCMask}', weight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
 
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
         cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
-        fontsize_clabel = 7
+        fontsize_clabel = 5
         cbar.ax.tick_params(axis='y', which='both', right=False, labelright=False)
         for j, lab in enumerate(clabels):
             cbar.ax.text(1.5, 1/(float(colorbins.size-1)*2) + j/float(colorbins.size-1), lab,
@@ -136,7 +136,7 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(f'PSC mask {VERSION_CAL_LID_L2_PSCMask}', weight='bold', y=1.35)
+        plt.title(f'PSC mask {VERSION_CAL_LID_L2_PSCMask}', weight='bold', y=self.axes_title_pad)
 
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -161,12 +161,12 @@ if __name__ == '__main__':
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
     INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
-    GRANULE_DATE = "2018-07-08T04-07-14ZN"
+    GRANULE_DATE = "2011-06-25T00-11-52ZN"
     VERSION_CAL_LID_L2_PSCMask = "V2.00"
     TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
-    SLICE_START = -52.86 # profindex or longitude
-    SLICE_END = -134.98 # profindex or longitude
+    SLICE_START = 5.95 # profindex or longitude
+    SLICE_END = -150.07 # profindex or longitude
     EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
     INVERT_XAXIS = False
     YMIN = 8
@@ -255,6 +255,14 @@ if __name__ == '__main__':
     
     # Initialize instance of FigureMaker
     plot_fig = FigureMaker()
+    plot_fig.fig_w = cm2in(16) # cm
+    plot_fig.fig_h = cm2in(8) # cm
+    plot_fig.adj_left = 0.08
+    plot_fig.adj_bottom = 0.11
+    plot_fig.adj_right = 0.87
+    plot_fig.adj_top = 0.81
+    plot_fig.axes_title_pad = 1.14
+    plot_fig.axes_titlesize = 8
     plot_fig.set_and_create_fig_folder(FIGURES_PATH, GRANULE_DATE, lon[0], lon[-1])
     plot_fig.set_head_filename(GRANULE_DATE, lon[0], lon[-1])
     plot_fig.set_edges_removal(EDGES_REMOVAL)
