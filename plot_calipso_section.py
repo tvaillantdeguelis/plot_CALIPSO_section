@@ -3325,10 +3325,10 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2011-06-25T00-11-52ZN"
+        GRANULE_DATE = "2009-02-10T12-33-03ZN"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = 5.95 # profindex or longitude
-        SLICE_END = -150.07 # profindex or longitude
+        SLICE_START = -168.15 # profindex or longitude
+        SLICE_END = 178.68 # profindex or longitude
         CASE_STUDY_NAME = None # None
     PTV_DENOISED_L1_FOLDERPATH=None #"/home/thibault/Documents/Pro/Recherche/codes/DATA/CALIOP/Willem_PTV/test_01_2023/2016-09-18T14-06-18ZN/batch_width_512_overlap_0/" # name of folderpath, "None" if unused
     VERSION_CAL_LID_L1 = "V4.51"
@@ -3341,9 +3341,9 @@ if __name__ == '__main__':
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
-    YMIN = 8
+    YMIN = -2
     YMAX = 30 # None
-    COLORMAP = "FRIENDLY" # "BROWSE": use colormaps of browse images
+    COLORMAP = "BROWSE" # "BROWSE": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
     BROWSE_IMAGE_ASPECT_RATIO = True
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
@@ -3385,9 +3385,9 @@ if __name__ == '__main__':
     PLOT_PARAMS_1064              = False
     PLOT_NB_BINS_SHIFT            = False
     PLOT_VFM_FEATURE_TYPE         = True
-    PLOT_VFM_HORIZONTAL_AVERAGING = False
+    PLOT_VFM_HORIZONTAL_AVERAGING = True
     PLOT_VFM_PHASE                = True
-    PLOT_VFM_SUBTYPE              = False
+    PLOT_VFM_SUBTYPE              = True
     PLOT_FEATURE_DR               = False
     PLOT_FEATURE_DR1064           = False
     PLOT_FEATURE_ACR              = False
