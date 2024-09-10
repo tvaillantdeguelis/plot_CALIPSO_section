@@ -281,7 +281,7 @@ class FigureMaker(CALIOPFigureMaker):
         if COLORMAP == "BROWSE":
             colormap_style = 1
         elif COLORMAP == "FRIENDLY":
-            colormap_style = 55
+            colormap_style = 57
         else:
             colormap_style = 0
 
@@ -1416,6 +1416,21 @@ class FigureMaker(CALIOPFigureMaker):
                                 norm=my_norm, rasterized=True)
             cbar_edges = True
             clabelpad = self.clabelpad 
+        elif colormap_style == 57: # CALIOP-like alternative
+            palette = ['#000000', '#060b54', '#22296c', '#3a4683', '#2f6c99', '#2490ad', '#19b4c2', '#0ed9d7', '#02ffed',  
+                       '#B0DE9E', '#f4e725', '#fd9708', '#ee3801', '#a70103', '#580001',
+                       '#2a0000', '#352929', '#4e4a4a', '#6d6b6b', '#8f8e8e', '#b2b2b2', '#d8d8d8', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.000001, 0.00001, 
+                               0.0001, 0.0002, 0.0004, 0.0006, 0.0008,
+                               0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 
+                               0.01, 0.02, 0.03, 0.04, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad  
         elif colormap_style == 100: # PSC
             my_cmap = cmocean.cm.thermal
             my_cmap.colorbar_extend = 'both'
@@ -1835,7 +1850,7 @@ class FigureMaker(CALIOPFigureMaker):
                                 '1.0', '2.0', '3.0', '4.0', '5.0']
             for j, bound in enumerate(bounds):
                 cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
-        elif colormap_style in [55,]:
+        elif colormap_style in [55, 57]:
             cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
             cbar.ax.tick_params(which='both', labelright=False)
             cbar_major_label = ['×$10^{-6}$', '×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
@@ -2429,7 +2444,7 @@ class FigureMaker(CALIOPFigureMaker):
         cbar.ax.yaxis.set_minor_locator(FixedLocator(np.array((-999,))))
 
         # Add bin labels to the colorbar
-        if True:
+        if False:
             # for j, mid_bin in enumerate(np.arange(0.05, 0.55+.0001, 0.1)):
             #     cbar.ax.text(1.5, mid_bin, f"{mid_bin:.1f}", va='center', weight='bold', c=palette[j+2], fontsize=8, path_effects=[pe.withStroke(linewidth=1, foreground="k")])
             # outline_colors = ['0.5', '0.2', 'k', 'k', 'k', 'k']
@@ -3325,10 +3340,10 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2009-02-10T12-33-03ZN"
+        GRANULE_DATE = "2006-08-13T17-33-22ZN"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = -168.15 # profindex or longitude
-        SLICE_END = 178.68 # profindex or longitude
+        SLICE_START = 121.56 # profindex or longitude
+        SLICE_END = 110.51 # profindex or longitude
         CASE_STUDY_NAME = None # None
     PTV_DENOISED_L1_FOLDERPATH=None #"/home/thibault/Documents/Pro/Recherche/codes/DATA/CALIOP/Willem_PTV/test_01_2023/2016-09-18T14-06-18ZN/batch_width_512_overlap_0/" # name of folderpath, "None" if unused
     VERSION_CAL_LID_L1 = "V4.51"
@@ -3342,8 +3357,8 @@ if __name__ == '__main__':
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
     YMIN = -2
-    YMAX = 30 # None
-    COLORMAP = "BROWSE" # "BROWSE": use colormaps of browse images
+    YMAX = 20 # None
+    COLORMAP = "FRIENDLY" # "BROWSE": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
     BROWSE_IMAGE_ASPECT_RATIO = True
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
@@ -3358,8 +3373,8 @@ if __name__ == '__main__':
     PLOT_AB_532_PER_HIST          = False
     PLOT_AB_1064                  = True
     PLOT_AB_1064_HIST             = False
-    PLOT_ACR                      = True
-    PLOT_DR                       = True
+    PLOT_ACR                      = False
+    PLOT_DR                       = False
     PLOT_AB_MOL_532               = False
     PLOT_AB_MOL_532_PAR           = False
     PLOT_AB_MOL_532_PER           = False
@@ -3385,8 +3400,8 @@ if __name__ == '__main__':
     PLOT_PARAMS_1064              = False
     PLOT_NB_BINS_SHIFT            = False
     PLOT_VFM_FEATURE_TYPE         = True
-    PLOT_VFM_HORIZONTAL_AVERAGING = True
-    PLOT_VFM_PHASE                = True
+    PLOT_VFM_HORIZONTAL_AVERAGING = False
+    PLOT_VFM_PHASE                = False
     PLOT_VFM_SUBTYPE              = True
     PLOT_FEATURE_DR               = False
     PLOT_FEATURE_DR1064           = False

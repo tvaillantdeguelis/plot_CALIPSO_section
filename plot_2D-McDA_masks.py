@@ -184,7 +184,7 @@ class FigureMaker(CALIOPFigureMaker):
             # Determine if it's a mask or atsr step
             if not np.all(mask[step, :, :] == 0):
                 self.plot_mask(step, mask[step, :, :], channel)
-            if not np.all(atsr[step, :, :] == FILL_VALUE_FLOAT):
+            if not atsr[step, :, :].mask.all():
                 self.plot_atsr(step, atsr[step, :, :], channel)
 
 
@@ -409,16 +409,16 @@ if __name__ == '__main__':
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
     INDATA_FOLDER = "/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/out/data/"
-    GRANULE_DATE = "2011-06-25T00-11-52ZN"
-    GRANULE_SECTION = "_lon_5.95_-150.07" # void if complete file
-    VERSION_2D_McDA = "V1.0.2"
-    TYPE_2D_McDA = "Release"
+    GRANULE_DATE = "2006-08-13T17-33-22ZN"
+    GRANULE_SECTION = "_lon_116.00_115.70" # void if complete file
+    VERSION_2D_McDA = "V1.0.3"
+    TYPE_2D_McDA = "Dev"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-    SLICE_START = 5.95 # profindex or longitude
-    SLICE_END = -150.07 # profindex or longitude
+    SLICE_START = 116.00 # profindex or longitude
+    SLICE_END = 115.70 # profindex or longitude
     EDGES_REMOVAL = 0 # number of 1/3-km prof to remove on both edges of plot
     MAX_DETECT_LEVEL = 5
-    PLOT_ALL_STEPS = False
+    PLOT_ALL_STEPS = True
     INVERT_XAXIS = False
     YMIN = -2 # None
     YMAX = 20
