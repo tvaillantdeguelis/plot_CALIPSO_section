@@ -12,12 +12,33 @@ plot_calipso_section () {
               --export=GRANULE_DATE="$1",SLICE_START_END_TYPE="$2",SLICE_START="$3",SLICE_END="$4",CASE_STUDY_NAME="$5" plot_calipso_section.sbatch
 }
 
-case_study_name="Polar stratospheric clouds"
+case_study_name="Antarctic PSC"
 granule_date="2008-07-17T19-15-43ZN"
 slice_start_end_type='longitude' # 'profindex' or 'longitude'
 slice_start=83.89 # profindex or longitude
 slice_end=7.65 # profindex or longitude
 plot_calipso_section $granule_date $slice_start_end_type $slice_start $slice_end "$case_study_name"
+
+# case_study_name="Antarctic ice wave PSC"
+# granule_date="2008-07-17T19-15-43ZN"
+# slice_start_end_type='longitude' # 'profindex' or 'longitude'
+# slice_start=7.34 # profindex or longitude
+# slice_end=-68.77 # profindex or longitude
+# plot_calipso_section $granule_date $slice_start_end_type $slice_start $slice_end "$case_study_name"
+
+# case_study_name="Arctic PSC"
+# granule_date="2010-01-18T00-19-57ZN"
+# slice_start_end_type='longitude' # 'profindex' or 'longitude'
+# slice_start=170.68 # profindex or longitude
+# slice_end=27.93 # profindex or longitude
+# plot_calipso_section $granule_date $slice_start_end_type $slice_start $slice_end "$case_study_name"
+
+# case_study_name="Antarctic faint PSC"
+# granule_date="2011-06-25T00-11-52ZN"
+# slice_start_end_type='longitude' # 'profindex' or 'longitude'
+# slice_start=5.95 # profindex or longitude
+# slice_end=-150.07 # profindex or longitude
+# plot_calipso_section $granule_date $slice_start_end_type $slice_start $slice_end "$case_study_name"
 
 case_study_name="Artic snow/ice surfaces"
 granule_date="2017-02-10T23-46-03ZD"

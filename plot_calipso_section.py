@@ -281,7 +281,7 @@ class FigureMaker(CALIOPFigureMaker):
         if COLORMAP == "BROWSE":
             colormap_style = 1
         elif COLORMAP == "FRIENDLY":
-            colormap_style = 57
+            colormap_style = 78
         else:
             colormap_style = 0
 
@@ -1431,6 +1431,381 @@ class FigureMaker(CALIOPFigureMaker):
                                 norm=my_norm, rasterized=True)
             cbar_edges = True
             clabelpad = self.clabelpad  
+        elif colormap_style == 58: # CALIOP-like alternative
+            palette = ['#000000', '#30123b', '#3f3b97', '#4661d6', '#4687fb', '#35abf8', '#1ccdd8', '#1ce6b4', '#43f787', 
+                       '#79fe59', '#f4e725', '#fd9708', '#ee3801', '#a70103', '#580001',
+                       '#2a0000', '#352929', '#4e4a4a', '#6d6b6b', '#8f8e8e', '#b2b2b2', '#d8d8d8', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.000001, 0.00001, 
+                               0.0001, 0.0002, 0.0004, 0.0006, 0.0008,
+                               0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 
+                               0.01, 0.02, 0.03, 0.04, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad  
+        elif colormap_style == 59: # CALIOP-like alternative
+            palette = ['#000000', '#000064', '#2b088b', '#5a1d9d', '#82389e', '#a25697', '#bd768a', '#d2977a', '#e4b965', 
+                       '#f3dc49', '#ffff00', '#ffad00', '#e16102', '#a52107', '#580000',
+                       '#2a0000', '#352929', '#4e4a4a', '#6d6b6b', '#8f8e8e', '#b2b2b2', '#d8d8d8', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.000001, 0.00001, 
+                               0.0001, 0.0002, 0.0004, 0.0006, 0.0008,
+                               0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 
+                               0.01, 0.02, 0.03, 0.04, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad  
+        elif colormap_style == 60: # CALIOP-like alternative
+            palette = ['#000000', '#060b54', '#1e1f64', '#323372', '#444881', '#555d8f', '#66739d', '#778aab', '#92adc0', '#bcd2c1', '#f0f6b9', 
+                       '#f3e641', '#ff8a00', '#e70101', '#870303', '#2e0606',
+                       '#462f2f', '#5e5757', '#7f7f7f', '#a8a8a8', '#d3d3d3', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.000001, 0.00001, 
+                               0.0001, 0.0002, 0.0004, 0.0006, 0.0008, 
+                               0.001, 0.0012, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 
+                               0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad  
+        elif colormap_style == 61: # CALIOP-like alternative
+            palette = ['#000000', '#060B54', '#34137e', '#571e97', '#7d2fb0', '#a54ac9', '#ca6cdf', '#ea97f1', '#fdc8fc', '#ffe0d1', '#fdea96',
+                       '#f3e641', '#ff8a00', '#e70101', '#870303', '#2e0606',
+                       '#462f2f', '#5e5757', '#7f7f7f', '#a8a8a8', '#d3d3d3', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.000001, 0.00001, 
+                               0.0001, 0.0002, 0.0004, 0.0006, 0.0008, 
+                               0.001, 0.0012, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 
+                               0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad  
+        elif colormap_style == 62: # CALIOP-like alternative
+            palette = ['#000000', '#060B54', '#34137e', '#453c91', '#595f9f', '#7382a6', '#95a4a2', '#c1c588',
+                       '#f3e641', '#ff8a00', '#e70101', '#870303', '#2e0606',
+                       '#462f2f', '#5e5757', '#7f7f7f', '#a8a8a8', '#d3d3d3', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.000001, 0.00001, 
+                               0.0001, 0.0004, 0.0007, 
+                               0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 
+                               0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad  
+        elif colormap_style == 63: # CALIOP-like alternative
+            palette = ['#000000', '#380061', '#2a2b9a', '#3c48bf', '#6966cf', '#9186d1', '#b4aac0', '#ced297',
+                       '#f3e641', '#ff8a00', '#e70101', '#870303', '#2e0606',
+                       '#462f2f', '#5e5757', '#7f7f7f', '#a8a8a8', '#d3d3d3', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.000001, 0.00001, 
+                               0.0001, 0.0004, 0.0007, 
+                               0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 
+                               0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 64: # CALIOP-like alternative
+            palette = ['#000000', '#0a2472', '#2046c1', '#6375d6', '#a4a5d2', '#ebdeb5',
+                        '#ebde39', '#f88b0f', '#e70101', '#8c120d', '#42191c',
+                        '#5f4545', '#7d7272', '#a1a0a0', '#cfcfcf', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0005, 
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 
+                                0.01, 0.015, 0.025, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 65: # CALIOP-like alternative
+            palette = ['#000000', '#0a2472', '#2a40a3', '#5262bf', '#8987b1', '#b8ae8d',
+                        '#fff23a', '#fda321', '#ec4809', '#a11a14', '#42191c',
+                        '#5f4545', '#7d7272', '#a1a0a0', '#cfcfcf', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0005, 
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 
+                                0.01, 0.015, 0.025, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 66: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#40417b', '#6a6c94', '#a1a0a9', '#ebdeb5',
+                        '#ebde39', '#f88b0f', '#e70101', '#8c120d', '#42191c',
+                        '#5f4545', '#7d7272', '#a1a0a0', '#cfcfcf', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0005, 
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 
+                                0.01, 0.015, 0.025, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 67: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#40417b', '#61648e', '#888998', '#b8ae8d',
+                        '#fff23a', '#fda321', '#ec4809', '#a11a14', '#42191c',
+                        '#5f4545', '#7d7272', '#a1a0a0', '#cfcfcf', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0005, 
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 
+                                0.01, 0.015, 0.025, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 68: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#4f4c7e', '#7f7c8f', '#b8ae8d',
+                        '#fff23a', '#fda321', '#ec4809', '#a11a14', '#42191c',
+                        '#573f41', '#6c6565', '#8a8a8a', '#b0b0b0', '#d7d7d7', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0005, 
+                                0.001, 0.0015, 0.0025, 0.0035, 0.0045, 0.0055, 0.0065, 0.008, 
+                                0.01, 0.015, 0.025, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 69: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#2d507a', '#647a91', '#9ea5a9', '#d8d2c0',
+                        '#ffff81', '#ffa23a', '#e53803', '#85120a', '#2b0000', 
+                        '#483333', '#656565', '#959595', '#c9c9c9', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0005,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.0055, 0.0075, 
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 70: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#283c71', '#2f597e', '#8f99a2', '#d8d2c0',
+                        '#ffff81', '#ffa23a', '#e53803', '#85120a', '#2b0000', 
+                        '#483333', '#656565', '#959595', '#c9c9c9', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0005,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.0055, 0.0075, 
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 71: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#2d507a', '#647a91', '#9ea5a9', '#d8d2c0',
+                        '#fbff41', '#fca722', '#ec4809', '#841b0d', '#2b0000',
+                        '#412c2c', '#565656', '#7d7d7d', '#a6a6a6', '#d2d2d2', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0005,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 72: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#283c71', '#2f597e', '#9ea5a9', '#d8d2c0',
+                        '#fbff41', '#fca722', '#ec4809', '#841b0d', '#2b0000',
+                        '#412c2c', '#565656', '#7d7d7d', '#a6a6a6', '#d2d2d2', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0005,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 73: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#2d507a', '#647a91', '#9ea5a9', '#d8d2c0',
+                        '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#412c2c', '#565656', '#7d7d7d', '#a6a6a6', '#d2d2d2', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0005,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 74: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#2f3e73', '#465d82', '#647a91', '#9ea5a9', '#d8d2c0',
+                        '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#412c2c', '#565656', '#7d7d7d', '#a6a6a6', '#d2d2d2', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0004, 0.0007,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 75: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#2b376f', '#3a4e7a', '#4d6486', '#647a91', '#9ea5a9', '#d8d2c0',
+                        '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#412c2c', '#565656', '#7d7d7d', '#a6a6a6', '#d2d2d2', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0003, 0.0005, 0.0007,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 76: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#2f3e73', '#465d82', '#647a91', '#9ea5a9', '#d8d2c0',
+                        '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#443b3b', '#5a5a5a', '#787878', '#989898', '#b9b9b9', '#dcdcdc', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0004, 0.0007,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.013, 0.018, 0.025, 0.035, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 77: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#2f3e73', '#465d82', '#647a91', '#9ea5a9', '#d8d2c0',
+                        '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#443b3b', '#606060', '#858585', '#acacac', '#d5d5d5', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0004, 0.0007,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 78: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#2f3e73', '#465d82', '#647a91', '#a7aaa0', '#e9daae',
+                        '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#443b3b', '#606060', '#858585', '#acacac', '#d5d5d5', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0004, 0.0007,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 79: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#2c3770', '#3c4f7b', '#4f6687', '#687d92', '#879399', '#a7aaa0', '#e9daae',
+                        '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#443b3b', '#606060', '#858585', '#acacac', '#d5d5d5', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0002, 0.0004, 0.0006, 0.0008,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 80: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#344376', '#4f6687', '#788895', '#a7aaa0', '#e9daae',
+                        '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#443b3b', '#606060', '#858585', '#acacac', '#d5d5d5', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0004, 0.0007,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 81: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#344376', '#4f6687', '#788895', '#a7aaa0', '#e9daae',
+                        '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#443b3b', '#606060', '#858585', '#acacac', '#d5d5d5', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0003, 0.0006,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
+        elif colormap_style == 82: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#29346e', '#374878', '#465c82', '#5a708b', '#718394', '#a7aaa0', '#e9daae',
+                        '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#443b3b', '#606060', '#858585', '#acacac', '#d5d5d5', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0002, 0.0004, 0.0006, 0.0008,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
         elif colormap_style == 100: # PSC
             my_cmap = cmocean.cm.thermal
             my_cmap.colorbar_extend = 'both'
@@ -1444,6 +1819,7 @@ class FigureMaker(CALIOPFigureMaker):
                 plt.clim(1e-6, 1e-3)
             cbar_edges = False
             clabelpad = self.clabelpad
+        
         elif colormap_style in [155,]:
             palette = ['#000000', '#01020e', '#02041c', '#03062a', '#040738', '#050946',
                        '#060b54', '#0a0e57', '#0e1159', '#11145c', '#14175f', '#171a61', '#1a1d64', '#1c2067', '#1f236a', '#21266c', '#24296f', 
@@ -1515,10 +1891,10 @@ class FigureMaker(CALIOPFigureMaker):
             symbol_txt = "\\beta'_{1064}"
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
         deconv_txt = "\ (deconvoluted)" if APPLY_DECONVOLUTION else ""
-        plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$"\
-                % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
-        # plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$ (colorbar n° %d)"\
-        #         % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt, colormap_style), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        # plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$"\
+        #         % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$ (colorbar n° %d)"\
+                % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt, colormap_style), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
         cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=cbar_edges)
         if cbar_edges: # comment when new version of matplotlib fixed bug of drawedges
@@ -1850,7 +2226,7 @@ class FigureMaker(CALIOPFigureMaker):
                                 '1.0', '2.0', '3.0', '4.0', '5.0']
             for j, bound in enumerate(bounds):
                 cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
-        elif colormap_style in [55, 57]:
+        elif colormap_style in [55, 57, 58, 59]:
             cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
             cbar.ax.tick_params(which='both', labelright=False)
             cbar_major_label = ['×$10^{-6}$', '×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
@@ -1877,6 +2253,162 @@ class FigureMaker(CALIOPFigureMaker):
                                 '1.0', '2.0', '4.0', '6.0', '8.0',
                                 '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '7.0', '8.0', '9.0',
                                 '1.0', '2.0', '3.0', '4.0', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [60, 61]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-6}$', '×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-6, 1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0',
+                                '1.0', '2.0', '4.0', '6.0', '8.0',
+                                '1.0', '1.2', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.0', '3.0', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [62, 63]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-6}$', '×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-6, 1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0',
+                                '1.0', '4.0', '7.0', 
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.0', '3.0', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [64, 65, 66, 67]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '5.0', 
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.5', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [68,]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '5.0', 
+                                '1.0', '1.5', '2.5', '3.5', '4.5', '5.5', '6.5', '8.0',
+                                '1.0', '1.5', '2.5', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [69, 70]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '5.0',
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.5', '7.5',
+                                '1.0', '1.5', '2.0', '3.0', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [71, 72, 73]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '5.0',
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.0', '3.0', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [74, 77, 78, 80]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '4.0', '7.0',
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.0', '3.0', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [75,]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '3.0', '5.0', '7.0',
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.0', '3.0', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [76,]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '4.0', '7.0',
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.3', '1.8', '2.5', '3.5', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [79, 82]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '2.0', '4.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.0', '3.0', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [81,]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '3.0', '6.0',
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.0', '3.0', '5.0']
             for j, bound in enumerate(bounds):
                 cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
         elif colormap_style in [100,]:
@@ -1931,15 +2463,15 @@ class FigureMaker(CALIOPFigureMaker):
         # Set colorbar fontsizes
         cbar.ax.yaxis.label.set_size(self.axes_labelsize)
 
-        # Save figure
-        filename = f"AB{wl:d}{polar}_{grid}"
-        self.save_fig(filename)
-
-        # # Save figure (for test_colorbar)
-        # self.fig_folder = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"
-        # filename = f"AB{wl:d}{polar}_{grid}_{colormap_style}"
-        # # filename = f"AB{wl:d}{polar}_{grid}_0Current"
+        # # Save figure
+        # filename = f"AB{wl:d}{polar}_{grid}"
         # self.save_fig(filename)
+
+        # Save figure (for test_colorbar)
+        self.fig_folder = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"
+        filename = f"AB{wl:d}{polar}_{grid}_{colormap_style}"
+        # filename = f"AB{wl:d}{polar}_{grid}_0Current"
+        self.save_fig(filename)
         
         # # Save data in pickle (for test_colorbar)
         # atb2.dump("/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"+self.head_filename+f"_AB{wl:d}{polar}"+'.pkl')
@@ -2751,9 +3283,14 @@ class FigureMaker(CALIOPFigureMaker):
                                 j/float(colorbins.size-1), lab, va='center',
                                 fontsize=4, transform=ax1.transAxes)
 
-        # Save figure
+        # # Save figure
+        # filename = f"VFM"
+        # self.save_fig(filename)
+
+        # Save figure (for test_colorbar)
+        self.fig_folder = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"
         filename = f"VFM"
-        self.save_fig(filename)
+        self.save_fig(filename)#, transparent=True, adjust=(0.02, 0.02, 0.98, 0.8))
         
         # Close figure
         plt.close(fig)
@@ -3340,10 +3877,10 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2006-08-13T17-33-22ZN"
+        GRANULE_DATE = "2009-02-10T12-33-03ZN"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = 121.56 # profindex or longitude
-        SLICE_END = 110.51 # profindex or longitude
+        SLICE_START = -168.15 # profindex or longitude
+        SLICE_END = 178.68 # profindex or longitude
         CASE_STUDY_NAME = None # None
     PTV_DENOISED_L1_FOLDERPATH=None #"/home/thibault/Documents/Pro/Recherche/codes/DATA/CALIOP/Willem_PTV/test_01_2023/2016-09-18T14-06-18ZN/batch_width_512_overlap_0/" # name of folderpath, "None" if unused
     VERSION_CAL_LID_L1 = "V4.51"
@@ -3356,7 +3893,7 @@ if __name__ == '__main__':
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
-    YMIN = -2
+    YMIN = -0.5
     YMAX = 20 # None
     COLORMAP = "FRIENDLY" # "BROWSE": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
@@ -3364,16 +3901,16 @@ if __name__ == '__main__':
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     #-----------------------------------------------------------------------
     # Plot flags
-    PLOT_MAP                      = True
-    PLOT_AB_532                   = True
+    PLOT_MAP                      = False
+    PLOT_AB_532                   = False
     PLOT_AB_532_HIST              = False
-    PLOT_AB_532_PAR               = True
+    PLOT_AB_532_PAR               = False
     PLOT_AB_532_PAR_HIST          = False
-    PLOT_AB_532_PER               = True
+    PLOT_AB_532_PER               = False
     PLOT_AB_532_PER_HIST          = False
-    PLOT_AB_1064                  = True
+    PLOT_AB_1064                  = False
     PLOT_AB_1064_HIST             = False
-    PLOT_ACR                      = False
+    PLOT_ACR                      = True
     PLOT_DR                       = False
     PLOT_AB_MOL_532               = False
     PLOT_AB_MOL_532_PAR           = False
@@ -3402,7 +3939,7 @@ if __name__ == '__main__':
     PLOT_VFM_FEATURE_TYPE         = True
     PLOT_VFM_HORIZONTAL_AVERAGING = False
     PLOT_VFM_PHASE                = False
-    PLOT_VFM_SUBTYPE              = True
+    PLOT_VFM_SUBTYPE              = False
     PLOT_FEATURE_DR               = False
     PLOT_FEATURE_DR1064           = False
     PLOT_FEATURE_ACR              = False

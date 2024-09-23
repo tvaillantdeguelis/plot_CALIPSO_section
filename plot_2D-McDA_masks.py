@@ -13,6 +13,7 @@ from matplotlib import cm, gridspec
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import MultipleLocator, FixedLocator, LogLocator
 import seaborn as sns
+import cmocean
 
 # Import my modules
 # sys.path.insert(0, '/home/vaillant/codes/projects/plot_CALIPSO_section/')
@@ -186,6 +187,46 @@ class FigureMaker(CALIOPFigureMaker):
                 self.plot_mask(step, mask[step, :, :], channel)
             if not atsr[step, :, :].mask.all():
                 self.plot_atsr(step, atsr[step, :, :], channel)
+
+
+    def plot_twoway_transmittance(self, twoway_transmittance, channel):
+        # Mask where fill_value
+        twoway_transmittance = np.ma.masked_where(twoway_transmittance == FILL_VALUE_FLOAT, twoway_transmittance)
+    
+        # Remove edges
+        if self.edges_removal != 0: # to avoid error with "-0"
+            twoway_transmittance = remove_edges(twoway_transmittance, self.edges_removal)
+    
+        # Figure style
+        setstyle("ticks_nogrid")
+    
+        # Create figure
+        fig = plt.figure(figsize=(self.fig_w, self.fig_h))
+        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+    
+        # Plot figure
+        ax0 = plt.subplot(gs0[0])
+        ax0.set_facecolor((0.75, 0.75, 0.75))
+        my_cmap = cmocean.cm.thermal
+        # # Put negative values to 1e-9 so they don't appear transparent
+        # twoway_transmittance[(twoway_transmittance<0) & ~twoway_transmittance.mask] = 1e-9
+        pc = plt.pcolormesh(self.pindexbins, self.altbins, twoway_transmittance.T, cmap=my_cmap)
+        plt.clim(0.1, 1)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
+        plt.title(r'$\mathbf{Two-way\ transmittance\ %s}$' % channel, fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        
+        # Plot colorbar
+        ax1 = plt.subplot(gs0[1])
+        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', extend='min')
+        cbar.set_label(label="$T^{2}$",)
+        ax1.yaxis.set_major_locator(MultipleLocator(0.1))
+        
+        # Save figure
+        filename = f"{channel}_twoway_transmittance"
+        self.save_fig(filename)
+        
+        # Close figure
+        plt.close(fig)
 
 
     def plot_composite_mask(self, mask):
@@ -410,15 +451,15 @@ if __name__ == '__main__':
     # PARAMETERS
     INDATA_FOLDER = "/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/out/data/"
     GRANULE_DATE = "2006-08-13T17-33-22ZN"
-    GRANULE_SECTION = "_lon_116.00_115.70" # void if complete file
-    VERSION_2D_McDA = "V1.0.3"
+    GRANULE_SECTION = "_lon_121.56_110.51" # void if complete file
+    VERSION_2D_McDA = "V1.0.4"
     TYPE_2D_McDA = "Dev"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-    SLICE_START = 116.00 # profindex or longitude
-    SLICE_END = 115.70 # profindex or longitude
+    SLICE_START = 121.56 # profindex or longitude
+    SLICE_END = 110.51 # profindex or longitude
     EDGES_REMOVAL = 0 # number of 1/3-km prof to remove on both edges of plot
     MAX_DETECT_LEVEL = 5
-    PLOT_ALL_STEPS = True
+    PLOT_ALL_STEPS = False
     INVERT_XAXIS = False
     YMIN = -2 # None
     YMAX = 20
@@ -486,7 +527,10 @@ if __name__ == '__main__':
             "Detection_Flags_1064_steps",
             "Parallel_Attenuated_Scattering_Ratio_532_steps",
             "Perpendicular_Attenuated_Scattering_Ratio_532_steps",
-            "Attenuated_Scattering_Ratio_1064_steps"
+            "Attenuated_Scattering_Ratio_1064_steps",
+            "Parallel_CumulativeTwoWayTransmittance_532",
+            "Perpendicular_CumulativeTwoWayTransmittance_532",
+            "CumulativeTwoWayTransmittance_1064"
         ]
         for key in cal_2d_mcda_steps_keys:
             data_dict_cal_2d_mcda_steps[key] = cal_2d_mcda.get_data(key, SLICE_START, SLICE_END,
@@ -546,6 +590,10 @@ if __name__ == '__main__':
         plot_fig.plot_steps(data_dict_cal_2d_mcda_steps["Detection_Flags_1064_steps"],
                    data_dict_cal_2d_mcda_steps["Attenuated_Scattering_Ratio_1064_steps"],
                    '1064')
+    if PLOT_ALL_STEPS or True:
+        plot_fig.plot_twoway_transmittance(data_dict_cal_2d_mcda_steps["Parallel_CumulativeTwoWayTransmittance_532"], '532_par')
+        plot_fig.plot_twoway_transmittance(data_dict_cal_2d_mcda_steps["Perpendicular_CumulativeTwoWayTransmittance_532"], '532_per')
+        plot_fig.plot_twoway_transmittance(data_dict_cal_2d_mcda_steps["CumulativeTwoWayTransmittance_1064"], '1064')
     
     
     print_time(tic_main_program)
