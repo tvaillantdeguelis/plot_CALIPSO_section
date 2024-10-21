@@ -281,7 +281,7 @@ class FigureMaker(CALIOPFigureMaker):
         if COLORMAP == "BROWSE":
             colormap_style = 1
         elif COLORMAP == "FRIENDLY":
-            colormap_style = 78
+            colormap_style = 81
         else:
             colormap_style = 0
 
@@ -1806,6 +1806,21 @@ class FigureMaker(CALIOPFigureMaker):
                                 norm=my_norm, rasterized=True)
             cbar_edges = True
             clabelpad = self.clabelpad
+        elif colormap_style == 83: # CALIOP-like alternative
+            palette = ['#000000', '#1e1f64', '#344376', '#4f6687', '#7588a8', '#a1abbd', '#d5d1b1', 
+                       '#fbff41', '#fea100', '#ec2401', '#84110c', '#2b0000',
+                        '#443b3b', '#606060', '#858585', '#acacac', '#d5d5d5', '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            bounds = np.array([0.00001, 
+                                0.0001, 0.0003, 0.0006,
+                                0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                0.01, 0.015, 0.02, 0.03, 0.05])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = True
+            clabelpad = self.clabelpad
         elif colormap_style == 100: # PSC
             my_cmap = cmocean.cm.thermal
             my_cmap.colorbar_extend = 'both'
@@ -1860,6 +1875,41 @@ class FigureMaker(CALIOPFigureMaker):
                                 norm=my_norm, rasterized=True)
             cbar_edges = False
             clabelpad = self.clabelpad
+        elif colormap_style in [181,]:
+            palette = [ '#000000', '#090612', '#110b1d', '#141028', '#171433', '#19163f', '#1b194b', '#1d1c57',
+                        '#1e1f64', '#202165', '#222466', '#232668', '#252969', '#262b6a', '#282d6b', '#29306c', '#2b326e', '#2c356f', '#2e3770', '#2f3971', '#303c72', '#323e74', '#334175',
+                        '#344376', '#364577', '#384878', '#3a4a79', '#3c4c7b', '#3d4e7c', '#3f517d', '#41537e', '#43557f', '#455880', '#465a81', '#485c82', '#4a5f84', '#4c6185', '#4d6486',
+                        '#4f6687', '#526888', '#556a89', '#586d8a', '#5a6f8b', '#5d718c', '#60738d', '#63768e', '#65788f', '#687a8f', '#6b7c90', '#6d7f91', '#708192', '#738393', '#758694', 
+                        '#788895', '#7b8a96', '#7e8c96', '#828f97', '#859198', '#889399', '#8b9599', '#8e989a', '#919a9b', '#949c9c', '#989e9c', '#9ba19d', '#9ea39e', '#a1a59f', '#a4a89f',
+                        '#a7aaa0', '#abada1', '#b0b0a2', '#b4b3a3', '#b9b7a4', '#bdbaa5', '#c1bda6', '#c6c0a7', '#cac3a8', '#cfc7a9', '#d3caa9', '#d7cdaa', '#dcd0ab', '#e0d3ac', '#e5d7ad',
+                        '#e9daae', '#ebdca8', '#ecdfa2', '#eee19c', '#f0e496', '#f1e68f', '#f2e989', '#f4eb82', '#f5ee7c', '#f6f075', '#f7f36d', '#f8f566', '#f9f75e', '#fafa55', '#fafc4c',
+                        '#fbff41', '#fcf93e', '#fdf33a', '#fded36', '#fee633', '#fee02f', '#ffda2c', '#ffd428', '#ffce24', '#ffc720', '#ffc11c', '#ffbb17', '#ffb412', '#ffae0d', '#fea806',
+                        '#fea100', '#fd9b00', '#fc9400', '#fb8d00', '#fb8700', '#f98000', '#f87900', '#f77100', '#f66a00', '#f56200', '#f35a00', '#f25200', '#f14900', '#ef3e00', '#ee3300', 
+                        '#ec2401', '#e52302', '#de2104', '#d62005', '#cf1f06', '#c81d07', '#c11c08', '#ba1b09', '#b31a09', '#ac180a', '#a5170b', '#9f160b', '#98150b', '#91130c', '#8b120c',
+                        '#84110c', '#7d100c', '#770f0c', '#710e0b', '#6a0d0b', '#640c0a', '#5e0b0a', '#580909', '#520808', '#4c0807', '#460706', '#400605', '#3a0504', '#350402', '#300301',
+                        '#2b0000', '#2c0506', '#2e0a0c', '#300e11', '#311215', '#331618', '#351a1b', '#371e1f', '#392122', '#3b2526', '#3c2829', '#3e2c2d', '#403030', '#413434', '#433737',
+                        '#443b3b', '#463d3d', '#484040', '#4a4242', '#4b4545', '#4d4747', '#4f4949', '#514c4c', '#534e4e', '#555151', '#575353', '#585656', '#5a5858', '#5c5b5b', '#5e5d5d',
+                        '#606060', '#626262', '#656565', '#676767', '#6a6a6a', '#6c6c6c', '#6f6f6f', '#717171', '#737373', '#767676', '#787878', '#7b7b7b', '#7d7d7d', '#808080', '#828282',
+                        '#858585', '#888888', '#8a8a8a', '#8d8d8d', '#8f8f8f', '#929292', '#949494', '#979797', '#9a9a9a', '#9c9c9c', '#9f9f9f', '#a1a1a1', '#a4a4a4', '#a7a7a7', '#a9a9a9',
+                        '#acacac', '#afafaf', '#b1b1b1', '#b4b4b4', '#b7b7b7', '#b9b9b9', '#bcbcbc', '#bfbfbf', '#c2c2c2', '#c4c4c4', '#c7c7c7', '#cacaca', '#cdcdcd', '#cfcfcf', '#d2d2d2',
+                        '#d5d5d5', '#dadada', '#dfdfdf', '#e5e5e5', '#eaeaea', '#efefef', '#f4f4f4', '#fafafa',
+                        '#ffffff']
+            my_cmap = mpl.colors.ListedColormap(palette)
+            discrete_bounds = np.array([0.00001, 
+                                        0.0001, 0.0003, 0.0006,
+                                        0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008,
+                                        0.01, 0.015, 0.02, 0.03, 0.05])
+            nb_colors_between_mid_discrete_bin = 15 # 16*15+2 = 242
+            bounds = np.array(())
+            for i in range(discrete_bounds.size-1): # color of discrete bounds at the mid value of the range bin
+                bounds = np.append(bounds, np.linspace(discrete_bounds[i], discrete_bounds[i+1], nb_colors_between_mid_discrete_bin+1)[:-1])
+            bounds = np.append(bounds, discrete_bounds[-1])
+            colors = my_cmap(np.arange(len(palette)))
+            my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = False
+            clabelpad = self.clabelpad
         else: # LogNorm colormap
             # my_cmap = cm.inferno
             my_cmap = takecmap('extviridis_black_white')
@@ -1875,7 +1925,7 @@ class FigureMaker(CALIOPFigureMaker):
                 plt.clim(1e-5, 1e-1)
             cbar_edges = False
             clabelpad = self.clabelpad
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=False)
         if wl == 532:
             if polar=='par':
                 polar_txt = '\ Parallel'
@@ -1891,10 +1941,10 @@ class FigureMaker(CALIOPFigureMaker):
             symbol_txt = "\\beta'_{1064}"
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
         deconv_txt = "\ (deconvoluted)" if APPLY_DECONVOLUTION else ""
-        plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$"\
-                % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
-        # plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$ (colorbar n° %d)"\
-        #         % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt, colormap_style), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        # plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$"\
+        #         % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$ (colorbar n° %d)"\
+                % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt, colormap_style), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
         cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=cbar_edges)
         if cbar_edges: # comment when new version of matplotlib fixed bug of drawedges
@@ -2397,7 +2447,7 @@ class FigureMaker(CALIOPFigureMaker):
                                 '1.0', '1.5', '2.0', '3.0', '5.0']
             for j, bound in enumerate(bounds):
                 cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
-        elif colormap_style in [81,]:
+        elif colormap_style in [81, 83]:
             cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
             cbar.ax.tick_params(which='both', labelright=False)
             cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
@@ -2443,6 +2493,24 @@ class FigureMaker(CALIOPFigureMaker):
                                 '1.0', '2.0', '3.0', '4.0', '5.0']
             for j, bound in enumerate(minor_bounds):
                 cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [181,]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            minor_bounds = np.array([0.00001, 
+                                     0.0001, 0.0003, 0.0006,
+                                     0.001, 0.0015, 0.002, 0.003, 0.004, 0.005, 0.006, 0.008, 
+                                     0.01, 0.015, 0.02, 0.03, 0.05])
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(minor_bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '3.0', '6.0',
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.0', '3.0', '5.0']
+            for j, bound in enumerate(minor_bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
         else: # LogNorm colormap
             cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
             cbar.ax.tick_params(which='both', labelright=False)
@@ -2463,15 +2531,15 @@ class FigureMaker(CALIOPFigureMaker):
         # Set colorbar fontsizes
         cbar.ax.yaxis.label.set_size(self.axes_labelsize)
 
-        # Save figure
-        filename = f"AB{wl:d}{polar}_{grid}"
-        self.save_fig(filename)
-
-        # # Save figure (for test_colorbar)
-        # self.fig_folder = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"
-        # filename = f"AB{wl:d}{polar}_{grid}_{colormap_style}"
-        # # filename = f"AB{wl:d}{polar}_{grid}_0Current"
+        # # Save figure
+        # filename = f"AB{wl:d}{polar}_{grid}"
         # self.save_fig(filename)
+
+        # Save figure (for test_colorbar)
+        self.fig_folder = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"
+        filename = f"AB{wl:d}{polar}_{grid}_{colormap_style}"
+        # filename = f"AB{wl:d}{polar}_{grid}_0Current"
+        self.save_fig(filename)
         
         # # Save data in pickle (for test_colorbar)
         # atb2.dump("/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"+self.head_filename+f"_AB{wl:d}{polar}"+'.pkl')
@@ -2956,7 +3024,7 @@ class FigureMaker(CALIOPFigureMaker):
                                 norm=my_norm, rasterized=True)
             cbar_edges = True
         
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=False)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=True)
         # self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_dist=False)
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
         plt.title("$\mathbf{Depolarization\ Ratio}\ \\frac{\\beta'_{\perp}}{\\beta'_{\parallel}}\ \mathbf{%s}$" %\
@@ -2996,10 +3064,10 @@ class FigureMaker(CALIOPFigureMaker):
 
         # # Filename  (for test_colorbar)
         # self.fig_folder = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"
-        # # filename = f"DR_{grid}_{colorbar_name}"
-        # filename = f"DR_{grid}_0Current"
+        # filename = f"DR_{grid}_{colormap_style}"
+        # # filename = f"DR_{grid}_0Current"
 
-        # # Save figure
+        # Save figure
         # self.save_fig(filename)
 
         # Save data in pickle (for test_colorbar)
@@ -3244,16 +3312,7 @@ class FigureMaker(CALIOPFigureMaker):
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
         gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
         ax0 = plt.subplot(gs0[0])
-        if True:
-            cmaplist = ["#999999",
-                        "#77B3FB",
-                        "#FFFFF0",
-                        "#F3CF4F",
-                        "#FE9F6D",
-                        "#733C14",
-                        "#322115",
-                        "#DC332A"]
-        else:
+        if COLORMAP == "BROWSE":
             cmaplist = ['#777777',
                         "#0026FF",
                         "#00DCFF",
@@ -3262,11 +3321,20 @@ class FigureMaker(CALIOPFigureMaker):
                         "#00FF6E",
                         "#C0C0C0",
                         "#000000"]
-        my_cmap = mpl.colors.ListedColormap(cmaplist)
+        elif COLORMAP == "FRIENDLY":
+            cmaplist = ["#999999",
+                        "#77B3FB",
+                        "#FFFFF0",
+                        "#F3CF4F",
+                        "#FE9F6D",
+                        "#733C14",
+                        "#322115",
+                        "#DC332A"]
         colorbins = np.arange(9) - 0.5 # '0=Invalid', '1=Clear', '2=Cloud',
-                                    # '3=Tropo. aerosol', '4=Strato. aerosol',
-                                    # '5=Surface', '6=Subsurface',
-                                    # '7=Fully Attenuated'
+                                        # '3=Tropo. aerosol', '4=Strato. aerosol',
+                                        # '5=Surface', '6=Subsurface',
+                                        # '7=Fully Attenuated'
+        my_cmap = mpl.colors.ListedColormap(cmaplist)                            
         my_norm = mpl.colors.BoundaryNorm(colorbins, my_cmap.N)
         pc = plt.pcolormesh(self.pindexbins, self.altbins, vfm_type.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
@@ -3877,10 +3945,10 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2019-07-15T00-58-53ZN"
+        GRANULE_DATE = "2019-07-15T13-15-00ZD"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = 16.00 # profindex or longitude
-        SLICE_END = 5.00 # profindex or longitude
+        SLICE_START = 8.30 # profindex or longitude
+        SLICE_END = -2.62 # profindex or longitude
         CASE_STUDY_NAME = None # None
     PTV_DENOISED_L1_FOLDERPATH=None #"/home/thibault/Documents/Pro/Recherche/codes/DATA/CALIOP/Willem_PTV/test_01_2023/2016-09-18T14-06-18ZN/batch_width_512_overlap_0/" # name of folderpath, "None" if unused
     VERSION_CAL_LID_L1 = "V4.51"
@@ -3895,13 +3963,13 @@ if __name__ == '__main__':
     INVERT_XAXIS = False
     YMIN = -2
     YMAX = 30 # None
-    COLORMAP = "BROWSE" # "BROWSE": use colormaps of browse images
+    COLORMAP = "FRIENDLY" # "BROWSE": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
     BROWSE_IMAGE_ASPECT_RATIO = True
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     #-----------------------------------------------------------------------
     # Plot flags
-    PLOT_MAP                      = True
+    PLOT_MAP                      = False
     PLOT_AB_532                   = True
     PLOT_AB_532_HIST              = False
     PLOT_AB_532_PAR               = False
@@ -3911,7 +3979,7 @@ if __name__ == '__main__':
     PLOT_AB_1064                  = True
     PLOT_AB_1064_HIST             = False
     PLOT_ACR                      = False
-    PLOT_DR                       = True
+    PLOT_DR                       = False
     PLOT_AB_MOL_532               = False
     PLOT_AB_MOL_532_PAR           = False
     PLOT_AB_MOL_532_PER           = False
@@ -3936,7 +4004,7 @@ if __name__ == '__main__':
     PLOT_PARAMS_532_PER           = False   
     PLOT_PARAMS_1064              = False
     PLOT_NB_BINS_SHIFT            = False
-    PLOT_VFM_FEATURE_TYPE         = True
+    PLOT_VFM_FEATURE_TYPE         = False
     PLOT_VFM_HORIZONTAL_AVERAGING = False
     PLOT_VFM_PHASE                = False
     PLOT_VFM_SUBTYPE              = False
