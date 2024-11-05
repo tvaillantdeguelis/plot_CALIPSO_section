@@ -1941,10 +1941,10 @@ class FigureMaker(CALIOPFigureMaker):
             symbol_txt = "\\beta'_{1064}"
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
         deconv_txt = "\ (deconvoluted)" if APPLY_DECONVOLUTION else ""
-        # plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$"\
-        #         % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
-        plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$ (colorbar n° %d)"\
-                % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt, colormap_style), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$"\
+                % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        # plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$ (colorbar n° %d)"\
+        #         % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt, colormap_style), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
         cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=cbar_edges)
         if cbar_edges: # comment when new version of matplotlib fixed bug of drawedges
@@ -2531,15 +2531,15 @@ class FigureMaker(CALIOPFigureMaker):
         # Set colorbar fontsizes
         cbar.ax.yaxis.label.set_size(self.axes_labelsize)
 
-        # # Save figure
-        # filename = f"AB{wl:d}{polar}_{grid}"
-        # self.save_fig(filename)
+        # Save figure
+        filename = f"AB{wl:d}{polar}_{grid}"
+        self.save_fig(filename)
 
         # Save figure (for test_colorbar)
-        self.fig_folder = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"
-        filename = f"AB{wl:d}{polar}_{grid}_{colormap_style}"
+        # self.fig_folder = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"
+        # filename = f"AB{wl:d}{polar}_{grid}_{colormap_style}"
         # filename = f"AB{wl:d}{polar}_{grid}_0Current"
-        self.save_fig(filename)
+        # self.save_fig(filename)
         
         # # Save data in pickle (for test_colorbar)
         # atb2.dump("/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"+self.head_filename+f"_AB{wl:d}{polar}"+'.pkl')
@@ -3351,14 +3351,14 @@ class FigureMaker(CALIOPFigureMaker):
                                 j/float(colorbins.size-1), lab, va='center',
                                 fontsize=4, transform=ax1.transAxes)
 
-        # # Save figure
-        # filename = f"VFM"
-        # self.save_fig(filename)
-
-        # Save figure (for test_colorbar)
-        self.fig_folder = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"
+        # Save figure
         filename = f"VFM"
-        self.save_fig(filename)#, transparent=True, adjust=(0.02, 0.02, 0.98, 0.8))
+        self.save_fig(filename)
+
+        # # Save figure (for test_colorbar)
+        # self.fig_folder = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/test_colorbar/"
+        # filename = f"VFM"
+        # self.save_fig(filename)#, transparent=True, adjust=(0.02, 0.02, 0.98, 0.8))
         
         # Close figure
         plt.close(fig)
@@ -3945,10 +3945,10 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2019-07-15T13-15-00ZD"
+        GRANULE_DATE = "2008-07-17T19-15-43ZN"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = 8.30 # profindex or longitude
-        SLICE_END = -2.62 # profindex or longitude
+        SLICE_START = 70.80 # profindex or longitude
+        SLICE_END = -73.34 # profindex or longitude
         CASE_STUDY_NAME = None # None
     PTV_DENOISED_L1_FOLDERPATH=None #"/home/thibault/Documents/Pro/Recherche/codes/DATA/CALIOP/Willem_PTV/test_01_2023/2016-09-18T14-06-18ZN/batch_width_512_overlap_0/" # name of folderpath, "None" if unused
     VERSION_CAL_LID_L1 = "V4.51"
@@ -3961,25 +3961,25 @@ if __name__ == '__main__':
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
-    YMIN = -2
+    YMIN = 0
     YMAX = 30 # None
-    COLORMAP = "FRIENDLY" # "BROWSE": use colormaps of browse images
+    COLORMAP = "BROWSE" # "BROWSE": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
-    BROWSE_IMAGE_ASPECT_RATIO = True
+    BROWSE_IMAGE_ASPECT_RATIO = False
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     #-----------------------------------------------------------------------
     # Plot flags
     PLOT_MAP                      = False
     PLOT_AB_532                   = True
     PLOT_AB_532_HIST              = False
-    PLOT_AB_532_PAR               = False
+    PLOT_AB_532_PAR               = True
     PLOT_AB_532_PAR_HIST          = False
     PLOT_AB_532_PER               = True
     PLOT_AB_532_PER_HIST          = False
     PLOT_AB_1064                  = True
     PLOT_AB_1064_HIST             = False
-    PLOT_ACR                      = False
-    PLOT_DR                       = False
+    PLOT_ACR                      = True
+    PLOT_DR                       = True
     PLOT_AB_MOL_532               = False
     PLOT_AB_MOL_532_PAR           = False
     PLOT_AB_MOL_532_PER           = False
