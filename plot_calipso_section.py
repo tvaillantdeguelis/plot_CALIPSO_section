@@ -176,8 +176,8 @@ class FigureMaker(CALIOPFigureMaker):
         self.fig_w = cm2in(17.7) # cm
         self.fig_h = cm2in(6) # cm
         self.axes_titlesize = 8
-        self.axes_title_pad = 1.14
-        self.clabelpad = 40
+        self.axes_title_pad = 1.3
+        self.clabelpad = 50
 
     def plot_map(self, lat_granule, lon_granule, prof_UTC_time):
         """Plot CALIPSO track on a map"""
@@ -2450,17 +2450,17 @@ class FigureMaker(CALIOPFigureMaker):
         elif colormap_style in [81, 83]:
             cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
             cbar.ax.tick_params(which='both', labelright=False)
-            cbar_major_label = ['×$10^{-5}$', '×$10^{-4}$', '×$10^{-3}$', '×$10^{-2}$']
+            cbar_major_label = ['$\mathbf{×10^{-5}}$', '$\mathbf{×10^{-4}}$', '$\mathbf{×10^{-3}}$', '$\mathbf{×10^{-2}}$']
             c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
             for j, bound in enumerate(c_bar_major_values):
-                cbar.ax.text(3.2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+                cbar.ax.text(4.25, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
             cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
             cbar_minor_label = ['1.0',
                                 '1.0', '3.0', '6.0',
                                 '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
                                 '1.0', '1.5', '2.0', '3.0', '5.0']
             for j, bound in enumerate(bounds):
-                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=6)
         elif colormap_style in [100,]:
             cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
             cbar.ax.tick_params(which='both', labelright=False)
@@ -3945,10 +3945,10 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2008-07-17T19-15-43ZN"
+        GRANULE_DATE = "2014-06-14T06-16-54ZN"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = 70.80 # profindex or longitude
-        SLICE_END = -73.34 # profindex or longitude
+        SLICE_START = -63.77 # profindex or longitude
+        SLICE_END = -65.20 # profindex or longitude
         CASE_STUDY_NAME = None # None
     PTV_DENOISED_L1_FOLDERPATH=None #"/home/thibault/Documents/Pro/Recherche/codes/DATA/CALIOP/Willem_PTV/test_01_2023/2016-09-18T14-06-18ZN/batch_width_512_overlap_0/" # name of folderpath, "None" if unused
     VERSION_CAL_LID_L1 = "V4.51"
@@ -3962,10 +3962,10 @@ if __name__ == '__main__':
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
     YMIN = 0
-    YMAX = 30 # None
-    COLORMAP = "BROWSE" # "BROWSE": use colormaps of browse images
+    YMAX = 7.5 # None
+    COLORMAP = "FRIENDLY" # "BROWSE": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
-    BROWSE_IMAGE_ASPECT_RATIO = False
+    PLOT_ASPECT_RATIO = "spec" # "browse", "spec" or None
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     #-----------------------------------------------------------------------
     # Plot flags
@@ -4225,13 +4225,22 @@ if __name__ == '__main__':
     
     # Initialize instance of FigureMaker
     plot_fig = FigureMaker()
-    if BROWSE_IMAGE_ASPECT_RATIO:
+    if PLOT_ASPECT_RATIO == "browse":
         plot_fig.fig_w = cm2in(16) # cm
         plot_fig.fig_h = cm2in(8) # cm
         plot_fig.adj_left = 0.08
         plot_fig.adj_bottom = 0.11
         plot_fig.adj_right = 0.87
         plot_fig.adj_top = 0.81
+    elif PLOT_ASPECT_RATIO == "spec":
+        plot_fig.fig_w = cm2in(12) # cm
+        plot_fig.fig_h = cm2in(8) # cm
+        plot_fig.adj_left = 0.1
+        plot_fig.adj_bottom = 0.11
+        plot_fig.adj_right = 0.83
+        plot_fig.adj_top = 0.81
+        plot_fig.axes_title_pad = 1.15
+        plot_fig.clabelpad = 40
     plot_fig.set_and_create_fig_folder(FIGURES_PATH, GRANULE_DATE, cal_l1[REGULAR_GRIDS[0]].lon_min, cal_l1[REGULAR_GRIDS[0]].lon_max)
     plot_fig.set_head_filename(GRANULE_DATE, cal_l1[REGULAR_GRIDS[0]].lon_min, cal_l1[REGULAR_GRIDS[0]].lon_max)
     plot_fig.set_edges_removal(EDGES_REMOVAL)
