@@ -2569,7 +2569,7 @@ class FigureMaker(CALIOPFigureMaker):
         if COLORMAP == "BROWSE":
             colormap_style = 1
         elif COLORMAP == "FRIENDLY":
-            colormap_style = 6
+            colormap_style = 5
         else:
             colormap_style = 0
 
@@ -2700,7 +2700,7 @@ class FigureMaker(CALIOPFigureMaker):
                                 norm=my_norm, rasterized=True)
             cbar_edges = True
         # print('acr:', colors)
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=False)
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
         plt.title("$\mathbf{Attenuated\ Color\ Ratio}\ \\frac{\\beta'_{1064}}{\\beta'_{532}}\ \mathbf{%s}$" %\
                 (VERSION_CAL_LID_L1), fontsize=self.axes_titlesize, y=self.axes_title_pad)
@@ -3024,7 +3024,7 @@ class FigureMaker(CALIOPFigureMaker):
                                 norm=my_norm, rasterized=True)
             cbar_edges = True
         
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=True)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=False)
         # self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_dist=False)
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
         plt.title("$\mathbf{Depolarization\ Ratio}\ \\frac{\\beta'_{\perp}}{\\beta'_{\parallel}}\ \mathbf{%s}$" %\
@@ -3945,10 +3945,10 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2014-06-14T06-16-54ZN"
+        GRANULE_DATE = "2012-05-12T11-31-08ZN"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = -63.77 # profindex or longitude
-        SLICE_END = -65.20 # profindex or longitude
+        SLICE_START = -132.29 # profindex or longitude
+        SLICE_END = -148.26 # profindex or longitude
         CASE_STUDY_NAME = None # None
     PTV_DENOISED_L1_FOLDERPATH=None #"/home/thibault/Documents/Pro/Recherche/codes/DATA/CALIOP/Willem_PTV/test_01_2023/2016-09-18T14-06-18ZN/batch_width_512_overlap_0/" # name of folderpath, "None" if unused
     VERSION_CAL_LID_L1 = "V4.51"
@@ -3961,25 +3961,25 @@ if __name__ == '__main__':
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
-    YMIN = 0
-    YMAX = 7.5 # None
+    YMIN = -0.5
+    YMAX = 15 # None
     COLORMAP = "FRIENDLY" # "BROWSE": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
-    PLOT_ASPECT_RATIO = "spec" # "browse", "spec" or None
+    PLOT_ASPECT_RATIO = "browse" # "browse", "spec" or None
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     #-----------------------------------------------------------------------
     # Plot flags
-    PLOT_MAP                      = False
+    PLOT_MAP                      = True
     PLOT_AB_532                   = True
     PLOT_AB_532_HIST              = False
-    PLOT_AB_532_PAR               = True
+    PLOT_AB_532_PAR               = False
     PLOT_AB_532_PAR_HIST          = False
     PLOT_AB_532_PER               = True
     PLOT_AB_532_PER_HIST          = False
     PLOT_AB_1064                  = True
     PLOT_AB_1064_HIST             = False
-    PLOT_ACR                      = True
-    PLOT_DR                       = True
+    PLOT_ACR                      = False
+    PLOT_DR                       = False
     PLOT_AB_MOL_532               = False
     PLOT_AB_MOL_532_PAR           = False
     PLOT_AB_MOL_532_PER           = False
@@ -4232,6 +4232,7 @@ if __name__ == '__main__':
         plot_fig.adj_bottom = 0.11
         plot_fig.adj_right = 0.87
         plot_fig.adj_top = 0.81
+        plot_fig.clabelpad = 40
     elif PLOT_ASPECT_RATIO == "spec":
         plot_fig.fig_w = cm2in(12) # cm
         plot_fig.fig_h = cm2in(8) # cm
@@ -4241,6 +4242,8 @@ if __name__ == '__main__':
         plot_fig.adj_top = 0.81
         plot_fig.axes_title_pad = 1.15
         plot_fig.clabelpad = 40
+        plot_fig.y_major_locator = 1
+        plot_fig.y_minor_locator = 0.5
     plot_fig.set_and_create_fig_folder(FIGURES_PATH, GRANULE_DATE, cal_l1[REGULAR_GRIDS[0]].lon_min, cal_l1[REGULAR_GRIDS[0]].lon_max)
     plot_fig.set_head_filename(GRANULE_DATE, cal_l1[REGULAR_GRIDS[0]].lon_min, cal_l1[REGULAR_GRIDS[0]].lon_max)
     plot_fig.set_edges_removal(EDGES_REMOVAL)
