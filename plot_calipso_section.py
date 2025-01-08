@@ -3967,6 +3967,7 @@ if __name__ == '__main__':
                           # "FRIENDLY": use colorblind friendly colormaps
     PLOT_ASPECT_RATIO = "browse" # "browse", "spec" or None
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
+    FIGURES_FILETYPE = 'svg' #'png' 'svg'
     #-----------------------------------------------------------------------
     # Plot flags
     PLOT_MAP                      = True
@@ -3974,9 +3975,9 @@ if __name__ == '__main__':
     PLOT_AB_532_HIST              = False
     PLOT_AB_532_PAR               = False
     PLOT_AB_532_PAR_HIST          = False
-    PLOT_AB_532_PER               = True
+    PLOT_AB_532_PER               = False
     PLOT_AB_532_PER_HIST          = False
-    PLOT_AB_1064                  = True
+    PLOT_AB_1064                  = False
     PLOT_AB_1064_HIST             = False
     PLOT_ACR                      = False
     PLOT_DR                       = False
@@ -4243,7 +4244,8 @@ if __name__ == '__main__':
         plot_fig.axes_title_pad = 1.15
         plot_fig.clabelpad = 40
         plot_fig.y_major_locator = 1
-        plot_fig.y_minor_locator = 0.5
+        plot_fig.y_minor_locator = 0.2
+    plot_fig.filetype = FIGURES_FILETYPE
     plot_fig.set_and_create_fig_folder(FIGURES_PATH, GRANULE_DATE, cal_l1[REGULAR_GRIDS[0]].lon_min, cal_l1[REGULAR_GRIDS[0]].lon_max)
     plot_fig.set_head_filename(GRANULE_DATE, cal_l1[REGULAR_GRIDS[0]].lon_min, cal_l1[REGULAR_GRIDS[0]].lon_max)
     plot_fig.set_edges_removal(EDGES_REMOVAL)
