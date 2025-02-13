@@ -17,6 +17,7 @@ import copy
 import re
 import matplotlib.patheffects as pe
 import cmocean
+import cmlidar
 
 from my_modules.standard_outputs import print_time
 from my_modules.readers.calipso_reader import CALIOPRegularGridReader
@@ -178,6 +179,7 @@ class FigureMaker(CALIOPFigureMaker):
         self.axes_titlesize = 8
         self.axes_title_pad = 1.3
         self.clabelpad = 50
+        self.colorbar_position = 'right' # 'right' or 'bottom
 
     def plot_map(self, lat_granule, lon_granule, prof_UTC_time):
         """Plot CALIPSO track on a map"""
@@ -204,32 +206,32 @@ class FigureMaker(CALIOPFigureMaker):
         ax_proj = ccrs.Orthographic(lon_0, lat_0)
         # ax_proj = ccrs.NearsidePerspective(lon_0, lat_0)
         ax = plt.axes(projection=ax_proj)
-        ax.coastlines()
+        ax.coastlines(rasterized=True)
         ax.add_feature(cartopy.feature.LAKES, edgecolor='k')
         ax.stock_img()
         # Add night shadow
         year, month, day, hour, minute, second = np.asarray(re.findall(r'\d+', start_UTC_time), dtype=int)
         start_date = datetime.datetime(year, month, day, hour, minute, second)
-        ax.add_feature(Nightshade(start_date, alpha=0.2))
+        ax.add_feature(Nightshade(start_date, alpha=0.2), rasterized=True)
         year, month, day, hour, minute, second = np.asarray(re.findall(r'\d+', end_UTC_time), dtype=int)
         end_date = datetime.datetime(year, month, day, hour, minute, second)
-        ax.add_feature(Nightshade(end_date, alpha=0.2))
+        ax.add_feature(Nightshade(end_date, alpha=0.2), rasterized=True)
         # Add lat-lon grid
-        gl = ax.gridlines(color='k', linewidth=0.5, linestyle='--', alpha=0.2)
+        gl = ax.gridlines(color='k', linewidth=0.5, linestyle='--', alpha=0.2, rasterized=True)
         gl.xlocator = MultipleLocator(10)
         gl.ylocator = MultipleLocator(10)
-        gl = ax.gridlines(color='k', linewidth=1., linestyle='-', alpha=0.2)
+        gl = ax.gridlines(color='k', linewidth=1., linestyle='-', alpha=0.2, rasterized=True)
         gl.xlocator = MultipleLocator(30)
         gl.ylocator = MultipleLocator(30)
         ax.set_global()
         # Plot
-        plt.plot(lon_granule_plot, lat_granule, c='b', lw=4, alpha=0.1, transform=ccrs.PlateCarree())
+        plt.plot(lon_granule_plot, lat_granule, c='b', lw=4, alpha=0.1, transform=ccrs.PlateCarree(), rasterized=True)
         _, _, _, _, _, _, day_night_flag = granule_date_decomposition(GRANULE_DATE)
         if day_night_flag == 'ZN':
             sat_track_color = '#d92409'
         else:
             sat_track_color = '#a81c07'
-        plt.plot(lon_plot, self.lat, c=sat_track_color, lw=4, alpha=1, transform=ccrs.PlateCarree())
+        plt.plot(lon_plot, self.lat, c=sat_track_color, lw=4, alpha=1, transform=ccrs.PlateCarree(), rasterized=True)
         if CASE_STUDY_NAME:
             print(CASE_STUDY_NAME)
             title = f"{CASE_STUDY_NAME}\n{self.granule_date}\n{start_UTC_time} – {end_UTC_time}"
@@ -246,7 +248,7 @@ class FigureMaker(CALIOPFigureMaker):
 
         # Save figure
         filename = f"map"
-        self.save_fig(filename, transparent=True, adjust=(0.02, 0.02, 0.98, 0.9))
+        self.save_fig(filename, transparent=False, adjust=(0.02, 0.02, 0.98, 0.9))
 
         # Close figure
         plt.close(fig)
@@ -267,7 +269,12 @@ class FigureMaker(CALIOPFigureMaker):
         
         # Create figure
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0], facecolor='k')
 
         # colormap_style = 1 # 1: CALIOP-like
@@ -278,7 +285,7 @@ class FigureMaker(CALIOPFigureMaker):
         #                    # 6: CALIOP-like colorblind
         #                    # 7: few color, easy to read
         #                    # else: LogNorm (viridis)
-        if COLORMAP == "BROWSE":
+        if COLORMAP == "LEGACY":
             colormap_style = 1
         elif COLORMAP == "FRIENDLY":
             colormap_style = 81
@@ -1834,7 +1841,6 @@ class FigureMaker(CALIOPFigureMaker):
                 plt.clim(1e-6, 1e-3)
             cbar_edges = False
             clabelpad = self.clabelpad
-        
         elif colormap_style in [155,]:
             palette = ['#000000', '#01020e', '#02041c', '#03062a', '#040738', '#050946',
                        '#060b54', '#0a0e57', '#0e1159', '#11145c', '#14175f', '#171a61', '#1a1d64', '#1c2067', '#1f236a', '#21266c', '#24296f', 
@@ -1912,69 +1918,65 @@ class FigureMaker(CALIOPFigureMaker):
             clabelpad = self.clabelpad
         else: # LogNorm colormap
             # my_cmap = cm.inferno
-            my_cmap = takecmap('extviridis_black_white')
+            # my_cmap = takecmap('extviridis_black_white')
+            # my_cmap = cmocean.cm.thermal
+            my_cmap = takecmap('extthermal')
+            # my_cmap = cmlidar.cm.backscatter
             # my_cmap = takecmap('extviridis')
             my_cmap.colorbar_extend = 'both'
             pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
                                 norm=LogNorm(), rasterized=True)
             if polar=='per':
-                plt.clim(1e-5, 1e-1)
+                plt.clim(1e-5, 2e-3)
             elif wl==1064:
-                plt.clim(1e-5, 1e-1)
+                plt.clim(1e-5, 2e-3)
             else:
-                plt.clim(1e-5, 1e-1)
+                plt.clim(1e-5, 2e-3)
             cbar_edges = False
             clabelpad = self.clabelpad
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=False)
+        deconv_txt = "(deconvoluted)" if APPLY_DECONVOLUTION else ""
         if wl == 532:
-            if polar=='par':
-                polar_txt = '\ Parallel'
-                symbol_txt = "\\beta'_{532,\\parallel}"
-            elif polar=='per':
-                polar_txt = '\ Perpendicular'
-                symbol_txt = "\\beta'_{532,\\perp}"
+            if polar == 'par':
+                title = "Parallel 532 nm Attenuated Backscatter $\mathit{\\beta'_{532,\\parallel}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
+            elif polar == 'per':
+                title = "Perpendicular 532 nm Attenuated Backscatter $\mathit{\\beta'_{532,\\bot}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
             else:
-                polar_txt = '\ Total'
-                symbol_txt = "\\beta'_{532}"
-        else:
-            polar_txt = ''
-            symbol_txt = "\\beta'_{1064}"
-        # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
-        deconv_txt = "\ (deconvoluted)" if APPLY_DECONVOLUTION else ""
-        plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$"\
-                % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
-        # plt.title("$\mathbf{%d\ nm%s\ Attenuated\ Backscatter}\ %s\ \mathbf{%s%s}$ (colorbar n° %d)"\
-        #         % (wl, polar_txt, symbol_txt, VERSION_CAL_LID_L1, deconv_txt, colormap_style), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+                title = "Total 532 nm Attenuated Backscatter $\mathit{\\beta'_{532}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
+        elif wl == 1064:
+            title = f"1064 nm Attenuated Backscatter"+" $\mathit{\\beta'_{1064}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
+        plt.title(title, fontweight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=cbar_edges)
-        if cbar_edges: # comment when new version of matplotlib fixed bug of drawedges
-            plt.axhline(max(bounds), color='k', linewidth=1.)
-            plt.axhline(min(bounds), color='k', linewidth=1.)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=cbar_edges)
         cbar.set_label(label=r"$\beta'$ (km$^{-1}$ sr$^{-1}$)", labelpad=clabelpad)
         
         if colormap_style in [1, 2, 3, 4, 5]:
             # Colorbar ticks
             bounds_major_index = [0, 9, 24, -1]
             cbar_major = bounds[bounds_major_index]
-            cbar_minor = np.delete(bounds, bounds_major_index)
+            # cbar_minor = np.delete(bounds, bounds_major_index)
+            cbar_minor = np.copy(bounds)
             cbar.ax.yaxis.set_minor_locator(FixedLocator(cbar_minor))
             cbar.ax.yaxis.set_major_locator(FixedLocator(cbar_major))
             cbar.ax.tick_params(which='both', labelright=False)
             # Major labels
             #cbar_major_label = bounds[bounds_major_index]
-            cbar_major_label = ['1.0×$10^{-4}$', '1.0×$10^{-3}$', '1.0×$10^{-2}$',
-                                '1.0×$10^{-1}$']
+            cbar_major_label = ['$\mathbf{×10^{-4}}$', '$\mathbf{×10^{-3}}$', '$\mathbf{×10^{-2}}$', '$\mathbf{×10^{-1}}$']
             for j, lab in enumerate(cbar_major_label):
-                cbar.ax.text(2, cbar_major[j], lab, va='center', fontsize=self.ytick_labelsize)
+                cbar.ax.text(3.5, cbar_major[j], lab, va='center', fontsize=self.ytick_labelsize)
                 # Minor labels
                 # cbar_minor_label = np.delete(bounds, bounds_major_index)
-                cbar_minor_label = ['2.0', '3.0', '4.0', '5.0', '6.0', '7.0', '8.0',
-                                    '9.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0',
+                cbar_minor_label = ['1.0', '2.0', '3.0', '4.0', '5.0', '6.0', '7.0', '8.0',
+                                    '9.0', '1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0',
                                     '4.5', '5.0', '5.5', '6.0', '6.5', '7.0', '7.5',
-                                    '8.0', '2.0', '3.0', '4.0', '5.0', '6.0', '7.0',
-                                    '8.0', '9.0']
+                                    '8.0', '1.0', '2.0', '3.0', '4.0', '5.0', '6.0', '7.0',
+                                    '8.0', '9.0', '1.0']
             for j, lab in enumerate(cbar_minor_label):
-                cbar.ax.text(1.5, cbar_minor[j], lab, va='center', fontsize=2)
+                cbar.ax.text(2, cbar_minor[j], lab, va='center', fontsize=4)
         elif colormap_style == 5: # CALIOP-like colorblind colormap
             # Colorbar ticks
             bounds_major_index = [0, 9, 18, -1]
@@ -2453,7 +2455,10 @@ class FigureMaker(CALIOPFigureMaker):
             cbar_major_label = ['$\mathbf{×10^{-5}}$', '$\mathbf{×10^{-4}}$', '$\mathbf{×10^{-3}}$', '$\mathbf{×10^{-2}}$']
             c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
             for j, bound in enumerate(c_bar_major_values):
-                cbar.ax.text(4.25, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+                if PLOT_ASPECT_RATIO == "spec":
+                    cbar.ax.text(4.5, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+                else:
+                    cbar.ax.text(3.5, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
             cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
             cbar_minor_label = ['1.0',
                                 '1.0', '3.0', '6.0',
@@ -2558,7 +2563,12 @@ class FigureMaker(CALIOPFigureMaker):
 
         # Create figure
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0], facecolor='k')
 
         # colormap_style = 1 # 1: CALIOP-like
@@ -2566,7 +2576,7 @@ class FigureMaker(CALIOPFigureMaker):
         #                    # 3: linear extviridis
         #                    # 4: diverging
         #                    # else*: diverging with few bins
-        if COLORMAP == "BROWSE":
+        if COLORMAP == "LEGACY":
             colormap_style = 1
         elif COLORMAP == "FRIENDLY":
             colormap_style = 5
@@ -2574,10 +2584,25 @@ class FigureMaker(CALIOPFigureMaker):
             colormap_style = 0
 
         if colormap_style == 1: # CALIOP-like colormap
-            my_cmap = takecmap('caliop_browse_acr_both', 18)
             bounds = np.arange(0, 1.61, 0.1)
-            nb_colors = len(bounds) + 1
-            colors = my_cmap(np.arange(nb_colors))
+            colors = ['#000000',
+                    '#22A6F9',
+                    '#1ED036',
+                    '#FFFF4F',
+                    '#FDAA41',
+                    '#FD2F36',
+                    '#FD30F9',
+                    '#FFD2FD',
+                    '#A659F9',
+                    '#7D19A2',
+                    '#A6227C',
+                    '#A8D0FB',
+                    '#A8FDFD',
+                    '#A8FDD3',
+                    '#D2FFD4',
+                    '#FFFFD6',
+                    '#FFFFFF',
+                    '#999999']
             my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
             pc = plt.pcolormesh(self.pindexbins,self.altbins, acr.T, cmap=my_cmap,
                                 norm=my_norm, rasterized=True)
@@ -2628,15 +2653,8 @@ class FigureMaker(CALIOPFigureMaker):
             print('acr:', colors)
         elif colormap_style == 5: # New CALIOP browse image colorbar 
             bounds = np.array((0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.6))
-            colors = ["#C7C7C7",
-                      "#000000",
-                      "#160D84",
-                      "#700AA4",
-                      "#B83A87",
-                      "#E8735C",
-                      "#FCC140",
-                      "#EFF941",
-                      "#FFFFFF"]
+            # colors = ["#C7C7C7", "#000000", "#160D84", "#700AA4", "#B83A87", "#E8735C", "#FCC140", "#EFF941", "#FFFFFF"] # error in paper 1st submission
+            colors = ["#C8C8C8", "#000000", "#0D0887", "#7100A8", "#BA3388", "#E97257", "#FDC229", "#F0F921", "#FFFFFF"]
             # my_cmap = mpl.colors.ListedColormap(cmaplist)
             my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
             pc = plt.pcolormesh(self.pindexbins, self.altbins, acr.T, cmap=my_cmap,
@@ -2644,15 +2662,7 @@ class FigureMaker(CALIOPFigureMaker):
             cbar_edges = True
         elif colormap_style == 6: # Test for Xiaomei Lu to distinguish surface land, snow, and water
             bounds = np.array((0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.6))
-            colors = ["#C7C7C7",
-                      "#000000",
-                      "#160D84",
-                      "#700AA4",
-                      "#B83A87",
-                      "#E8735C",
-                      "#FCC140",
-                      "#EFF941",
-                      "#FFFFFF"]
+            colors = ["#C8C8C8", "#000000", "#0D0887", "#7100A8", "#BA3388", "#E97257", "#FDC229", "#F0F921", "#FFFFFF"]
             # my_cmap = mpl.colors.ListedColormap(cmaplist)
             my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
             pc = plt.pcolormesh(self.pindexbins, self.altbins, acr.T, cmap=my_cmap,
@@ -2700,21 +2710,30 @@ class FigureMaker(CALIOPFigureMaker):
                                 norm=my_norm, rasterized=True)
             cbar_edges = True
         # print('acr:', colors)
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=False)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_dist=True, flag_granule=False)
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
-        plt.title("$\mathbf{Attenuated\ Color\ Ratio}\ \\frac{\\beta'_{1064}}{\\beta'_{532}}\ \mathbf{%s}$" %\
-                (VERSION_CAL_LID_L1), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        plt.title("Attenuated Color Ratio $\mathit{\\frac{\\beta'_{1064}}{\\beta'_{532}}}$"+f" ({VERSION_CAL_LID_L1})", 
+                  fontweight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', extend='both',
-                            drawedges=cbar_edges)
-        if cbar_edges: # comment when new version of matplotlib fixed bug of drawedges
-            plt.axhline(max(bounds), color='k', linewidth=1.)
-            plt.axhline(min(bounds), color='k', linewidth=1.)
-        cbar.set_label(label=r"Attenuated Color Ratio", labelpad=5)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, extend='both', drawedges=cbar_edges)
+        # if cbar_edges: # comment when new version of matplotlib fixed bug of drawedges
+        #     plt.axhline(max(bounds), color='k', linewidth=1.)
+        #     plt.axhline(min(bounds), color='k', linewidth=1.)
+        cbar.set_label(label=r"Attenuated Color Ratio", labelpad=5, fontsize=self.ytick_labelsize)
         
         # Colorbar ticks
-        # cbar.ax.yaxis.set_major_locator(MultipleLocator(0.2))
-        cbar.ax.yaxis.set_minor_locator(MultipleLocator(1000.))
+        if COLORMAP == "LEGACY":
+            cbar.ax.yaxis.set_major_locator(MultipleLocator(0.1))
+            cbar.ax.tick_params(labelsize=self.axes_labelsize) 
+        # if self.colorbar_position == 'right':
+        #     # cbar.ax.yaxis.set_major_locator(MultipleLocator(0.2))
+        #     cbar.ax.yaxis.set_minor_locator(MultipleLocator(1000.))
+        # elif self.colorbar_position == 'right':
+        #     cbar.ax.xaxis.set_minor_locator(MultipleLocator(1000.))
 
         # Save figure
         filename = f"ACR_{grid}"
@@ -2734,7 +2753,12 @@ class FigureMaker(CALIOPFigureMaker):
 
         # Create figure
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0], facecolor='k')
 
         # colormap_style = 1 # 1: CALIOP-like
@@ -2742,7 +2766,7 @@ class FigureMaker(CALIOPFigureMaker):
         #                    # 3: quantitative RdYlBu
         #                    # 4*: quantitative cubeh1_r
         #                    # else: linear with few bins
-        if COLORMAP == "BROWSE":
+        if COLORMAP == "LEGACY":
             colormap_style = 1
         elif COLORMAP == "FRIENDLY":
             colormap_style = 6
@@ -2750,10 +2774,19 @@ class FigureMaker(CALIOPFigureMaker):
             colormap_style = 0
 
         if colormap_style == 1: # CALIOP-like colormap
-            my_cmap = takecmap('caliop_browse_depol_both', 12)
             bounds = np.arange(0, 1.01, 0.1)
-            nb_colors = len(bounds) + 1
-            colors = my_cmap(np.arange(nb_colors))
+            colors = ['#000000',
+                      '#16A8FC',
+                      '#12D226',
+                      '#FFFF39',
+                      '#FEAA2E',
+                      '#FE2025',
+                      '#FE20FC',
+                      '#FFD3FE',
+                      '#A857FC',
+                      '#FFFFFF',
+                      '#FFFFFF',
+                      '#FFFFFF']
             my_cmap, my_norm = from_levels_and_colors(bounds, colors, extend='both')
             pc = plt.pcolormesh(self.pindexbins, self.altbins, depol.T, cmap=my_cmap,
                                 norm=my_norm, rasterized=True)
@@ -3027,15 +3060,19 @@ class FigureMaker(CALIOPFigureMaker):
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=False)
         # self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_dist=False)
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
-        plt.title("$\mathbf{Depolarization\ Ratio}\ \\frac{\\beta'_{\perp}}{\\beta'_{\parallel}}\ \mathbf{%s}$" %\
-                (VERSION_CAL_LID_L1), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        plt.title("Depolarization Ratio $\mathit{\\frac{\\beta'_{\perp}}{\\beta'_{\parallel}}}$"+f" ({VERSION_CAL_LID_L1})",
+                  fontweight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
         # colorbar_name = "Current"
         # plt.title("$\mathbf{%s}$" % colorbar_name, y=1.03)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', extend='both', drawedges=cbar_edges)
-        if cbar_edges: # comment when new version of matplotlib fixed bug of drawedges
-            plt.axhline(max(bounds), color='k', linewidth=1.)
-            plt.axhline(min(bounds), color='k', linewidth=1.)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, extend='both', drawedges=cbar_edges)
+        # if cbar_edges: # comment when new version of matplotlib fixed bug of drawedges
+        #     plt.axhline(max(bounds), color='k', linewidth=1.)
+        #     plt.axhline(min(bounds), color='k', linewidth=1.)
         cbar.set_label(label=r"Depolarization Ratio", labelpad=5)
         
         # Colorbar ticks
@@ -3131,7 +3168,12 @@ class FigureMaker(CALIOPFigureMaker):
 
         # Create figure
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         
         # Plot
         ax0 = plt.subplot(gs0[0])
@@ -3147,7 +3189,11 @@ class FigureMaker(CALIOPFigureMaker):
                     % (wl, polar_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical')
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation)
         cbar.set_label(label=r"$\beta'$ (km$^{-1}$ sr$^{-1}$)", labelpad=30)
 
         # Save figure
@@ -3167,7 +3213,12 @@ class FigureMaker(CALIOPFigureMaker):
         setstyle("ticks_nogrid")
 
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0])
         my_cmap = takecmap("extviridis_r")
         pc = plt.pcolormesh(self.pindexbins, self.altbins, asr_sigma.T, cmap=my_cmap)
@@ -3186,7 +3237,11 @@ class FigureMaker(CALIOPFigureMaker):
         plt.title(r'$\mathbf{Estimated\ noise\ standard\ deviation\ at\ %d\ nm\ %s}$' %\
                 (wl, polar_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical')
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation)
         cbar.ax.yaxis.get_major_formatter()._usetex = False
         cbar.set_label(label=r"$\Delta R'$")
 
@@ -3210,7 +3265,12 @@ class FigureMaker(CALIOPFigureMaker):
         setstyle("ticks_nogrid")
 
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0])
 
         # Colormap
@@ -3239,7 +3299,11 @@ class FigureMaker(CALIOPFigureMaker):
         plt.title(r'$\mathbf{Attenuated\ scattering\ ratio\ at\ %d\ nm\ %s}$' % \
                 (wl, polar_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', extend='both')
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, extend='both')
         cbar.set_label(label="$R'$")
         # cbar.ax.yaxis.set_major_formatter(plt.FormatStrFormatter('%g'))
 
@@ -3264,7 +3328,12 @@ class FigureMaker(CALIOPFigureMaker):
         asr_sigma_sup = np.zeros(asr.shape)
         asr_sigma_sup[asr>(1+k*asr_sigma)] = 1
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         gs01 =  gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=gs0[1],
                                                 height_ratios=[1, 1, 1])
         ax0 = plt.subplot(gs0[0])
@@ -3284,7 +3353,11 @@ class FigureMaker(CALIOPFigureMaker):
         plt.title(r'$\mathbf{Attenuated\ scattering\ ratio\ %d\ nm\ %s}$' %\
                 (wl, polar_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs01[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=True)
         # cbar.ax.set_yticklabels([' ']) # Delete colorbar number label
         cbar.ax.tick_params(which='both', right=False, labelright=False)
         for j, lab in enumerate([r"$< 1 + %g \Delta R'$" % k,
@@ -3310,9 +3383,14 @@ class FigureMaker(CALIOPFigureMaker):
         setstyle("ticks_nogrid")
 
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0])
-        if COLORMAP == "BROWSE":
+        if COLORMAP == "LEGACY":
             cmaplist = ['#777777',
                         "#0026FF",
                         "#00DCFF",
@@ -3341,7 +3419,11 @@ class FigureMaker(CALIOPFigureMaker):
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
         plt.title(r'$\mathbf{Vertical\ Feature\ Mask\ %s}$' % VERSION_CAL_LID_L2, fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=True)
         # cbar.ax.set_yticklabels([' ']) # Delete colorbar number label
         cbar.ax.tick_params(which='both', right=False, labelright=False)
         for j, lab in enumerate(['Invalid', 'Clear', 'Cloud', 'Tropospheric Aerosol',
@@ -3373,7 +3455,12 @@ class FigureMaker(CALIOPFigureMaker):
         setstyle("ticks_nogrid")
 
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0])
 
         # my_cmap = takecmap('extviridis', cdark=0)
@@ -3391,7 +3478,11 @@ class FigureMaker(CALIOPFigureMaker):
         plt.title(r'$\mathbf{Vertical\ Feature\ Mask\ (horizontal\ averaging)\ %s}$' %\
                 VERSION_CAL_LID_L2, fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=True)
         # cbar.ax.set_yticklabels([' ']) # Delete colorbar number label
         cbar.ax.tick_params(which='both', right=False, labelright=False)
         for j, lab in enumerate(['Not applicable', '1/3 km', '1 km', '5 km',
@@ -3422,7 +3513,12 @@ class FigureMaker(CALIOPFigureMaker):
         setstyle("ticks_nogrid")
 
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0])
 
         cmaplist = ['#C0FFA8',
@@ -3440,7 +3536,11 @@ class FigureMaker(CALIOPFigureMaker):
         plt.title(r'$\mathbf{Vertical\ Feature\ Mask\ (cloud\ phase)\ %s}$' %\
                 VERSION_CAL_LID_L2, fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=True)
         # cbar.ax.set_yticklabels([' ']) # Delete colorbar number label
         cbar.ax.tick_params(which='both', right=False, labelright=False)
         for j, lab in enumerate(['Not applicable', 'Unknown', 'Ice', 'Water',
@@ -3480,7 +3580,12 @@ class FigureMaker(CALIOPFigureMaker):
         
         # Plot cloud subtypes
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0])
 
         cmaplist = ["#0026FF",
@@ -3509,7 +3614,11 @@ class FigureMaker(CALIOPFigureMaker):
         plt.title(r'$\mathbf{Vertical\ Feature\ Mask\ (cloud\ subtype)\ %s}$' %\
                 VERSION_CAL_LID_L2, fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=True)
         # cbar.ax.set_yticklabels([' ']) # Delete colorbar number label
         cbar.ax.tick_params(which='both', right=False, labelright=False)
         for j, lab in enumerate(['Not applicable', 'Low overcast, transparent',
@@ -3531,7 +3640,12 @@ class FigureMaker(CALIOPFigureMaker):
 
         # Plot tropo aerosol subtypes
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0])
         
         cmaplist = ["#C6C6C6",
@@ -3559,7 +3673,11 @@ class FigureMaker(CALIOPFigureMaker):
         plt.title(r'$\mathbf{Vertical\ Feature\ Mask\ (tropospheric\ aerosol\ subtype)\ %s}$' %\
                 VERSION_CAL_LID_L2, fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=True)
         # cbar.ax.set_yticklabels([' ']) # Delete colorbar number label
         cbar.ax.tick_params(which='both', right=False, labelright=False)
         for j, lab in enumerate(['Not applicable', 'Marine', 'Dust',
@@ -3580,7 +3698,12 @@ class FigureMaker(CALIOPFigureMaker):
         
         # Plot strato aerosol subtypes
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
         ax0 = plt.subplot(gs0[0])
 
         cmaplist = ["#C6C6C6",
@@ -3599,7 +3722,11 @@ class FigureMaker(CALIOPFigureMaker):
         plt.title(r'$\mathbf{Vertical\ Feature\ Mask\ (stratospheric\ aerosol\ subtype)\ %s}$' %\
                 VERSION_CAL_LID_L2, fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=True)
         # cbar.ax.set_yticklabels([' ']) # Delete colorbar number label
         cbar.ax.tick_params(which='both', right=False, labelright=False)
         for j, lab in enumerate(['Not applicable', 'PSC aerosol', 'Volcanic Ash',
@@ -3735,7 +3862,12 @@ class FigureMaker(CALIOPFigureMaker):
 
         # Create figure
         fig = plt.figure(figsize=(self.fig_w, self.fig_h))
-        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        
+        if self.colorbar_position == 'right':
+            gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+        elif self.colorbar_position == 'bottom':
+            gs0 = gridspec.GridSpec(2, 1, height_ratios=[15, 1], hspace=0.35)
+        
 
         # Colormap
         if (prop == 'AB532') | (prop == 'AB532par') | (prop == 'AB532per') |\
@@ -3896,10 +4028,14 @@ class FigureMaker(CALIOPFigureMaker):
         # Plot colorbar
         mpl.rcParams["axes.facecolor"]='1.' # white backgroud
         ax1 = plt.subplot(gs0[1])
-        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', extend=extend, drawedges=cbar_edges)
-        if cbar_edges: # comment when new version of matplotlib fixed bug of drawedges
-            plt.axhline(max(bounds), color='k', linewidth=1.)
-            plt.axhline(min(bounds), color='k', linewidth=1.)
+        if self.colorbar_position == 'right':
+            cbar_orientation = 'vertical'
+        elif self.colorbar_position == 'bottom':
+            cbar_orientation = 'horizontal'
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, extend=extend, drawedges=cbar_edges)
+        # if cbar_edges: # comment when new version of matplotlib fixed bug of drawedges
+        #     plt.axhline(max(bounds), color='k', linewidth=1.)
+        #     plt.axhline(min(bounds), color='k', linewidth=1.)
         cbar.set_label(label=cbar_label, labelpad=5)
         if (prop == 'AB532') | (prop == 'AB532par') | (prop == 'AB532per') |\
            (prop == 'AB1064'):
@@ -3945,10 +4081,10 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2012-05-12T11-31-08ZN"
+        GRANULE_DATE = "2016-09-20T13-01-09ZD" # "2009-02-10T12-33-03ZN"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = -132.29 # profindex or longitude
-        SLICE_END = -148.26 # profindex or longitude
+        SLICE_START = 9.571 # -168.15 # profindex or longitude
+        SLICE_END = 7.39 # 178.68 # profindex or longitude
         CASE_STUDY_NAME = None # None
     PTV_DENOISED_L1_FOLDERPATH=None #"/home/thibault/Documents/Pro/Recherche/codes/DATA/CALIOP/Willem_PTV/test_01_2023/2016-09-18T14-06-18ZN/batch_width_512_overlap_0/" # name of folderpath, "None" if unused
     VERSION_CAL_LID_L1 = "V4.51"
@@ -3961,11 +4097,11 @@ if __name__ == '__main__':
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
-    YMIN = -0.5
-    YMAX = 15 # None
-    COLORMAP = "FRIENDLY" # "BROWSE": use colormaps of browse images
+    YMIN = 0
+    YMAX = 7 # None
+    COLORMAP = "FRIENDLY" # "LEGACY": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
-    PLOT_ASPECT_RATIO = "browse" # "browse", "spec" or None
+    PLOT_ASPECT_RATIO = "spec" # "browse_colorbar_right", "browse_colorbar_bottom", "spec" or None
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     FIGURES_FILETYPE = 'svg' #'png' 'svg'
     #-----------------------------------------------------------------------
@@ -3973,14 +4109,14 @@ if __name__ == '__main__':
     PLOT_MAP                      = True
     PLOT_AB_532                   = True
     PLOT_AB_532_HIST              = False
-    PLOT_AB_532_PAR               = False
+    PLOT_AB_532_PAR               = True
     PLOT_AB_532_PAR_HIST          = False
-    PLOT_AB_532_PER               = False
+    PLOT_AB_532_PER               = True
     PLOT_AB_532_PER_HIST          = False
-    PLOT_AB_1064                  = False
+    PLOT_AB_1064                  = True
     PLOT_AB_1064_HIST             = False
-    PLOT_ACR                      = False
-    PLOT_DR                       = False
+    PLOT_ACR                      = True
+    PLOT_DR                       = True
     PLOT_AB_MOL_532               = False
     PLOT_AB_MOL_532_PAR           = False
     PLOT_AB_MOL_532_PER           = False
@@ -4226,14 +4362,29 @@ if __name__ == '__main__':
     
     # Initialize instance of FigureMaker
     plot_fig = FigureMaker()
-    if PLOT_ASPECT_RATIO == "browse":
+    if PLOT_ASPECT_RATIO == "browse_colorbar_right":
         plot_fig.fig_w = cm2in(16) # cm
         plot_fig.fig_h = cm2in(8) # cm
         plot_fig.adj_left = 0.08
         plot_fig.adj_bottom = 0.11
         plot_fig.adj_right = 0.87
         plot_fig.adj_top = 0.81
+        plot_fig.axes_title_pad = 1.15
         plot_fig.clabelpad = 40
+        plot_fig.colorbar_position = 'right'
+    elif PLOT_ASPECT_RATIO == "browse_colorbar_bottom":
+        plot_fig.fig_w = cm2in(13.5) # cm
+        plot_fig.fig_h = cm2in(10) # cm
+        plot_fig.adj_left = 0.08
+        plot_fig.adj_bottom = 0.11
+        plot_fig.adj_right = 0.94
+        plot_fig.adj_top = 0.81
+        plot_fig.axes_title_pad = 1.15
+        plot_fig.clabelpad = 40
+        plot_fig.colorbar_position = 'bottom'
+        plot_fig.axes_labelsize = 7
+        plot_fig.xtick_labelsize = 7
+        plot_fig.ytick_labelsize = 7
     elif PLOT_ASPECT_RATIO == "spec":
         plot_fig.fig_w = cm2in(12) # cm
         plot_fig.fig_h = cm2in(8) # cm

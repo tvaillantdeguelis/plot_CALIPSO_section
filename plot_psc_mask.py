@@ -40,14 +40,22 @@ class FigureMaker(CALIOPFigureMaker):
 
         # Colormap
         nb_colors = len(clabels)
+        # palette = ["#000000",
+        #            "#FFFFFF",
+        #            "#888888",
+        #            "#00FF26",
+        #            "#FAFF00",
+        #            "#00BBFF",
+        #            "#FF0000",
+        #            "#4700C3"]
         palette = ["#000000",
                    "#FFFFFF",
                    "#888888",
-                   "#00FF26",
-                   "#FAFF00",
-                   "#00BBFF",
-                   "#FF0000",
-                   "#4700C3"]
+                   "#FFFF00",
+                   "#FFA500",
+                   "#87CEFA",
+                   "#B22222",
+                   "#4169E1"]
         colorbins = np.array((-5, -3, -0.5, 0.5, 1.5, 3.5, 4.5, 5.5, 6.5))
         my_cmap = mpl.colors.ListedColormap(palette)
         my_norm = mpl.colors.BoundaryNorm(colorbins, my_cmap.N)
@@ -161,12 +169,12 @@ if __name__ == '__main__':
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
     INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
-    GRANULE_DATE = "2008-07-17T19-15-43ZN"
+    GRANULE_DATE = "2011-06-25T00-11-52ZN"
     VERSION_CAL_LID_L2_PSCMask = "V2.00"
     TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
-    SLICE_START = 70.82 # profindex or longitude
-    SLICE_END = -73.34 # profindex or longitude
+    SLICE_START = 5.95 # profindex or longitude
+    SLICE_END = -150.07 # profindex or longitude
     EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
     INVERT_XAXIS = False
     YMIN = 8
