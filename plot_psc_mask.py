@@ -169,12 +169,12 @@ if __name__ == '__main__':
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
     INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
-    GRANULE_DATE = "2011-06-25T00-11-52ZN"
+    GRANULE_DATE = "2010-01-18T01-58-53ZN"
     VERSION_CAL_LID_L2_PSCMask = "V2.00"
     TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
-    SLICE_START = 5.95 # profindex or longitude
-    SLICE_END = -150.07 # profindex or longitude
+    SLICE_START = 140.02 # profindex or longitude
+    SLICE_END = 6.00 # profindex or longitude
     EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
     INVERT_XAXIS = False
     YMIN = 8

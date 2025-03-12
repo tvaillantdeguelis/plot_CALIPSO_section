@@ -288,7 +288,7 @@ class FigureMaker(CALIOPFigureMaker):
         if COLORMAP == "LEGACY":
             colormap_style = 1
         elif COLORMAP == "FRIENDLY":
-            colormap_style = 81
+            colormap_style = 1000
         else:
             colormap_style = 0
 
@@ -1916,6 +1916,20 @@ class FigureMaker(CALIOPFigureMaker):
                                 norm=my_norm, rasterized=True)
             cbar_edges = False
             clabelpad = self.clabelpad
+        elif colormap_style in [1000,]:
+            my_cmap = cmlidar.cm.backscatter_18
+            my_norm = cmlidar.cm.backscatter_18_norm
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap, norm=my_norm,
+                                rasterized=True)
+            cbar_edges = False
+            clabelpad = self.clabelpad
+        elif colormap_style in [1001,]:
+            my_cmap = cmlidar.cm.backscatter_242
+            my_norm = cmlidar.cm.backscatter_242_norm
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap, norm=my_norm,
+                                rasterized=True)
+            cbar_edges = False
+            clabelpad = self.clabelpad
         else: # LogNorm colormap
             # my_cmap = cm.inferno
             # my_cmap = takecmap('extviridis_black_white')
@@ -1927,7 +1941,7 @@ class FigureMaker(CALIOPFigureMaker):
             pc = plt.pcolormesh(self.pindexbins, self.altbins, atb2.T, cmap=my_cmap,
                                 norm=LogNorm(), rasterized=True)
             if polar=='per':
-                plt.clim(1e-5, 2e-3)
+                plt.clim(1e-7, 1e-4)
             elif wl==1064:
                 plt.clim(1e-5, 2e-3)
             else:
@@ -1951,7 +1965,7 @@ class FigureMaker(CALIOPFigureMaker):
             cbar_orientation = 'vertical'
         elif self.colorbar_position == 'bottom':
             cbar_orientation = 'horizontal'
-        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=cbar_edges)
+        cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=cbar_edges, extend='both')
         cbar.set_label(label=r"$\beta'$ (km$^{-1}$ sr$^{-1}$)", labelpad=clabelpad)
         
         if colormap_style in [1, 2, 3, 4, 5]:
@@ -2516,21 +2530,38 @@ class FigureMaker(CALIOPFigureMaker):
                                 '1.0', '1.5', '2.0', '3.0', '5.0']
             for j, bound in enumerate(minor_bounds):
                 cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=4)
+        elif colormap_style in [1000, 1001]:
+            cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
+            cbar.ax.tick_params(which='both', labelright=False)
+            cbar_major_label = ['$\mathbf{×10^{-5}}$', '$\mathbf{×10^{-4}}$', '$\mathbf{×10^{-3}}$', '$\mathbf{×10^{-2}}$']
+            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
+            for j, bound in enumerate(c_bar_major_values):
+                if PLOT_ASPECT_RATIO == "spec":
+                    cbar.ax.text(4.5, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+                else:
+                    cbar.ax.text(3.5, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
+            bounds = cmlidar.cm.BACKSCATTER_DISCRETE_BOUNDS
+            cbar.ax.yaxis.set_minor_locator(FixedLocator(bounds))
+            cbar_minor_label = ['1.0',
+                                '1.0', '3.0', '6.0',
+                                '1.0', '1.5', '2.0', '3.0', '4.0', '5.0', '6.0', '8.0',
+                                '1.0', '1.5', '2.0', '3.0', '5.0']
+            for j, bound in enumerate(bounds):
+                cbar.ax.text(2, bound, cbar_minor_label[j], va='center', fontsize=6)
         else: # LogNorm colormap
             cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
             cbar.ax.tick_params(which='both', labelright=False)
-            cbar_major_label = ['$10^{-5}$', '$10^{-4}$', '$10^{-3}$', '$10^{-2}$', '$10^{-1}$']
-            c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2, 1e-1))
-            # cbar_major_label = ['$10^{-4}$', '$10^{-3}$', '$10^{-2}$', '$10^{-1}$']
-            # c_bar_major_values = np.array((1e-4, 1e-3, 1e-2, 1e-1))
+            # cbar_major_label = ['$10^{-5}$', '$10^{-4}$', '$10^{-3}$', '$10^{-2}$', '$10^{-1}$']
+            # c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2, 1e-1))
+            cbar_major_label = ['$10^{-7}$', '$10^{-6}$', '$10^{-5}$', '$10^{-4}$']
+            c_bar_major_values = np.array((1e-7, 1e-6, 1e-5, 1e-4))
             for j, bound in enumerate(c_bar_major_values):
                 cbar.ax.text(2, bound, cbar_major_label[j], va='center', fontsize=self.ytick_labelsize)
             # cbar.ax.ticklabel_format(style="scientific", scilimits=(0, 0))
-            minor_locators = np.concatenate((np.arange(2,10)*1e-5,
-                                             np.arange(2,10)*1e-4,
-                                             np.arange(2,10)*1e-3,
-                                             np.arange(2,10)*1e-2,
-                                             np.arange(2,10)*1e-1))
+            minor_locators = np.concatenate((np.arange(2,10)*1e-7,
+                                             np.arange(2,10)*1e-6,
+                                             np.arange(2,10)*1e-5,
+                                             np.arange(2,10)*1e-4))
             cbar.ax.yaxis.set_minor_locator(FixedLocator(minor_locators))
 
         # Set colorbar fontsizes
@@ -2579,7 +2610,7 @@ class FigureMaker(CALIOPFigureMaker):
         if COLORMAP == "LEGACY":
             colormap_style = 1
         elif COLORMAP == "FRIENDLY":
-            colormap_style = 5
+            colormap_style = 1000
         else:
             colormap_style = 0
 
@@ -2668,6 +2699,12 @@ class FigureMaker(CALIOPFigureMaker):
             pc = plt.pcolormesh(self.pindexbins, self.altbins, acr.T, cmap=my_cmap,
                                 norm=my_norm, rasterized=True)
             cbar_edges = True
+        elif colormap_style == 1000:
+            my_cmap = cmlidar.cm.colorratio_9
+            my_norm = cmlidar.cm.colorratio_9_norm
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, acr.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = False
         else: # Colorblind diverging with few bins
             bounds = np.arange(0, 1.61, 0.2)
             YlOrBr_cmap = True
@@ -2769,7 +2806,7 @@ class FigureMaker(CALIOPFigureMaker):
         if COLORMAP == "LEGACY":
             colormap_style = 1
         elif COLORMAP == "FRIENDLY":
-            colormap_style = 6
+            colormap_style = 1000
         else:
             colormap_style = 0
 
@@ -3037,6 +3074,12 @@ class FigureMaker(CALIOPFigureMaker):
             pc = plt.pcolormesh(self.pindexbins, self.altbins, depol.T, cmap=my_cmap,
                                 norm=my_norm, rasterized=True)
             cbar_edges = True
+        elif colormap_style == 1000:
+            my_cmap = cmlidar.cm.depol_8
+            my_norm = cmlidar.cm.depol_8_norm
+            pc = plt.pcolormesh(self.pindexbins, self.altbins, depol.T, cmap=my_cmap,
+                                norm=my_norm, rasterized=True)
+            cbar_edges = False
         else: # Colorblind linear with few bins
             my_cmap = takecmap('cubeh1_r', nb_colors=256, clight=1., cdark=0.)
             # my_cmap = copy.copy(cm.YlGnBu_r)
@@ -4081,29 +4124,29 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2016-09-20T13-01-09ZD" # "2009-02-10T12-33-03ZN"
+        GRANULE_DATE = "2016-09-18T13-13-48ZD" # "2009-02-10T12-33-03ZN"
+        FOLDER_PATH = "/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/in/CAL_LID_L1_denoised/" #None # if None, it will try automatic path detection based on information in paths.py
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = 9.571 # -168.15 # profindex or longitude
-        SLICE_END = 7.39 # 178.68 # profindex or longitude
+        SLICE_START = 5.08 # -168.15 # profindex or longitude
+        SLICE_END = 2.57 # 178.68 # profindex or longitude
         CASE_STUDY_NAME = None # None
-    PTV_DENOISED_L1_FOLDERPATH=None #"/home/thibault/Documents/Pro/Recherche/codes/DATA/CALIOP/Willem_PTV/test_01_2023/2016-09-18T14-06-18ZN/batch_width_512_overlap_0/" # name of folderpath, "None" if unused
-    VERSION_CAL_LID_L1 = "V4.51"
-    VERSION_CAL_LID_L2 = "V4.51"
+    VERSION_CAL_LID_L1 = "V4.10"
+    VERSION_CAL_LID_L2 = "V4.20"
     TYPE_CAL_LID_L1 = "Standard"
     TYPE_CAL_LID_L2 = "Standard"
     #-----------------------------------------------------------------------
     # Plot configuration
-    REGULAR_GRIDS = ['5kmx60m',] # ['333mx30m', '1kmx60m', '5kmx60m'] # list of regular grids to plot
+    REGULAR_GRIDS = ['5kmx60m', '333mx30m'] # ['333mx30m', '1kmx60m', '5kmx60m'] # list of regular grids to plot
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
     YMIN = 0
-    YMAX = 7 # None
+    YMAX = 8 # None
     COLORMAP = "FRIENDLY" # "LEGACY": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
-    PLOT_ASPECT_RATIO = "spec" # "browse_colorbar_right", "browse_colorbar_bottom", "spec" or None
+    PLOT_ASPECT_RATIO = "browse_colorbar_right" # "browse_colorbar_right", "browse_colorbar_bottom", "spec" or None
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
-    FIGURES_FILETYPE = 'svg' #'png' 'svg'
+    FIGURES_FILETYPE = 'png' #'png' 'svg'
     #-----------------------------------------------------------------------
     # Plot flags
     PLOT_MAP                      = True
@@ -4141,10 +4184,10 @@ if __name__ == '__main__':
     PLOT_PARAMS_532_PER           = False   
     PLOT_PARAMS_1064              = False
     PLOT_NB_BINS_SHIFT            = False
-    PLOT_VFM_FEATURE_TYPE         = False
-    PLOT_VFM_HORIZONTAL_AVERAGING = False
+    PLOT_VFM_FEATURE_TYPE         = True
+    PLOT_VFM_HORIZONTAL_AVERAGING = True
     PLOT_VFM_PHASE                = False
-    PLOT_VFM_SUBTYPE              = False
+    PLOT_VFM_SUBTYPE              = True
     PLOT_FEATURE_DR               = False
     PLOT_FEATURE_DR1064           = False
     PLOT_FEATURE_ACR              = False
@@ -4170,7 +4213,7 @@ if __name__ == '__main__':
                                                slice_start=SLICE_START,
                                                slice_end=SLICE_END,
                                                slice_start_end_type=SLICE_START_END_TYPE,
-                                               folderpath=PTV_DENOISED_L1_FOLDERPATH,
+                                               folderpath=FOLDER_PATH,
                                                deconvolution=APPLY_DECONVOLUTION)
     
     # Print filepaths of loading files

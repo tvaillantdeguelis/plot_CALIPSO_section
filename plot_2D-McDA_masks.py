@@ -450,19 +450,19 @@ if __name__ == '__main__':
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
     INDATA_FOLDER = "/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/out/data/"
-    GRANULE_DATE = "2011-06-25T00-11-52ZN"
-    GRANULE_SECTION = "_lon_5.93_-150.07" # void if complete file
+    GRANULE_DATE = "2016-09-18T13-13-48ZD"
+    GRANULE_SECTION = "_lon_6.00_2.00" # void if complete file
     VERSION_2D_McDA = "V1.0.4"
     TYPE_2D_McDA = "Dev"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-    SLICE_START = 5.93 # profindex or longitude
-    SLICE_END = -150.07 # profindex or longitude
+    SLICE_START = 5.08 # profindex or longitude
+    SLICE_END = 2.57 # profindex or longitude
     EDGES_REMOVAL = 0 # number of 1/3-km prof to remove on both edges of plot
     MAX_DETECT_LEVEL = 5
     PLOT_ALL_STEPS = False
     INVERT_XAXIS = False
-    YMIN = 8 # None
-    YMAX = 30
+    YMIN = 0 # None
+    YMAX = 8
     BROWSE_IMAGE_ASPECT_RATIO = True
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
