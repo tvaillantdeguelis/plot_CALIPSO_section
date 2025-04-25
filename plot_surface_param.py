@@ -13,12 +13,12 @@ import cartopy
 import cartopy.crs as ccrs
 import copy
 
-from my_modules.standard_outputs import print_time
-from my_modules.readers.calipso_reader import CALIOPReader
-from my_modules.figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
+from standard_outputs import print_time
+from readers.calipso_reader import CALIOPReader
+from figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
     CALIOPFigureMaker, remove_edges
-from my_modules.geotools import UTC_time_CALIPSO, geo_distance
-from my_modules.calipso_constants import *
+from geotools import UTC_time_CALIPSO, geo_distance
+from calipso_constants import *
 
 
 class FigureMaker(CALIOPFigureMaker):

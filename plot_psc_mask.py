@@ -13,11 +13,11 @@ import seaborn as sns
 import os
 import sys
 
-from my_modules.standard_outputs import print_time
-from my_modules.readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon
-from my_modules.figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
+from standard_outputs import print_time
+from readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon
+from figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
     CALIOPFigureMaker, remove_edges
-from my_modules.paths import split_granule_date
+from paths import split_granule_date
 
 
 class FigureMaker(CALIOPFigureMaker):
@@ -50,12 +50,12 @@ class FigureMaker(CALIOPFigureMaker):
         #            "#4700C3"]
         palette = ["#000000",
                    "#FFFFFF",
-                   "#888888",
+                   "#444444",
+                   "#00FA9A",
                    "#FFFF00",
-                   "#FFA500",
-                   "#87CEFA",
-                   "#B22222",
-                   "#4169E1"]
+                   "#00BBFF",
+                   "#FF0000",
+                   "#4700C3"]
         colorbins = np.array((-5, -3, -0.5, 0.5, 1.5, 3.5, 4.5, 5.5, 6.5))
         my_cmap = mpl.colors.ListedColormap(palette)
         my_norm = mpl.colors.BoundaryNorm(colorbins, my_cmap.N)
@@ -169,15 +169,15 @@ if __name__ == '__main__':
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
     INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
-    GRANULE_DATE = "2010-01-18T01-58-53ZN"
+    GRANULE_DATE = "2010-01-18T00-19-57ZN"
     VERSION_CAL_LID_L2_PSCMask = "V2.00"
     TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
-    SLICE_START = 140.02 # profindex or longitude
-    SLICE_END = 6.00 # profindex or longitude
+    SLICE_START = 170.59 # profindex or longitude
+    SLICE_END = 27.95 # profindex or longitude
     EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
     INVERT_XAXIS = False
-    YMIN = 8
+    YMIN = 15
     YMAX = 30
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -221,6 +221,8 @@ if __name__ == '__main__':
     profile_utc_time = cal_psc.get_data("Profile_UTC_Time")
     granule_start_index = (np.abs(profile_utc_time - granule_start_time)).argmin()
     granule_end_index = (np.abs(profile_utc_time - granule_end_time)).argmin()
+    print('granule_start_index:', granule_start_index)
+    print('granule_end_index:', granule_end_index)
     
 
     # Get prof_min and prof_max from longitudes

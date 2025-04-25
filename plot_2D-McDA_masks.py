@@ -17,10 +17,10 @@ import cmocean
 
 # Import my modules
 # sys.path.insert(0, '/home/vaillant/codes/projects/plot_CALIPSO_section/')
-from my_modules.standard_outputs import print_time
-from my_modules.readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon
-from my_modules.paths import split_granule_date
-from my_modules.figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
+from standard_outputs import print_time
+from readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon
+from paths import split_granule_date
+from figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
     CALIOPFigureMaker, remove_edges
 
 

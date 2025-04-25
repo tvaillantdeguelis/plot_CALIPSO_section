@@ -19,12 +19,12 @@ import matplotlib.patheffects as pe
 import cmocean
 import cmlidar
 
-from my_modules.standard_outputs import print_time
-from my_modules.readers.calipso_reader import CALIOPRegularGridReader
-from my_modules.figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
+from standard_outputs import print_time
+from readers.calipso_reader import CALIOPRegularGridReader
+from figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
     CALIOPFigureMaker, remove_edges, interactive_pixel_info
-from my_modules.geotools import UTC_time_CALIPSO, geo_distance, get_monotical_lon, granule_date_decomposition
-from my_modules.calipso_constants import *
+from geotools import UTC_time_CALIPSO, geo_distance, get_monotical_lon, granule_date_decomposition
+from calipso_constants import *
 
 
 def get_cal_l1_keys():
@@ -4124,11 +4124,11 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2016-09-18T13-13-48ZD" # "2009-02-10T12-33-03ZN"
-        FOLDER_PATH = "/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/in/CAL_LID_L1_denoised/" #None # if None, it will try automatic path detection based on information in paths.py
+        GRANULE_DATE = "2006-07-26T05-22-10ZD" # "2009-02-10T12-33-03ZN"
+        FOLDER_PATH = None #"/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/in/CAL_LID_L1_denoised/" #None # if None, it will try automatic path detection based on information in paths.py
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = 5.08 # -168.15 # profindex or longitude
-        SLICE_END = 2.57 # 178.68 # profindex or longitude
+        SLICE_START = 107.6 # -168.15 # profindex or longitude
+        SLICE_END = -45. # 178.68 # profindex or longitude
         CASE_STUDY_NAME = None # None
     VERSION_CAL_LID_L1 = "V4.10"
     VERSION_CAL_LID_L2 = "V4.20"
@@ -4136,12 +4136,12 @@ if __name__ == '__main__':
     TYPE_CAL_LID_L2 = "Standard"
     #-----------------------------------------------------------------------
     # Plot configuration
-    REGULAR_GRIDS = ['5kmx60m', '333mx30m'] # ['333mx30m', '1kmx60m', '5kmx60m'] # list of regular grids to plot
+    REGULAR_GRIDS = ['5kmx60m',] # ['333mx30m', '1kmx60m', '5kmx60m'] # list of regular grids to plot
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
     YMIN = 0
-    YMAX = 8 # None
+    YMAX = 15 # None
     COLORMAP = "FRIENDLY" # "LEGACY": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
     PLOT_ASPECT_RATIO = "browse_colorbar_right" # "browse_colorbar_right", "browse_colorbar_bottom", "spec" or None
@@ -4180,7 +4180,7 @@ if __name__ == '__main__':
     PLOT_ASR_532_PAR_ABOVE_STD    = False
     PLOT_ASR_532_PER_ABOVE_STD    = False
     PLOT_ASR_1064_ABOVE_STD       = False
-    PLOT_PARAMS_532_PAR           = False
+    PLOT_PARAMS_532_PAR           = True
     PLOT_PARAMS_532_PER           = False   
     PLOT_PARAMS_1064              = False
     PLOT_NB_BINS_SHIFT            = False
