@@ -4124,14 +4124,14 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2006-07-26T05-22-10ZD" # "2009-02-10T12-33-03ZN"
+        GRANULE_DATE = "2011-01-04T04-30-38ZN" # "2009-02-10T12-33-03ZN"
         FOLDER_PATH = None #"/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/in/CAL_LID_L1_denoised/" #None # if None, it will try automatic path detection based on information in paths.py
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = 107.6 # -168.15 # profindex or longitude
-        SLICE_END = -45. # 178.68 # profindex or longitude
+        SLICE_START = 111.59 # -168.15 # profindex or longitude
+        SLICE_END = -35.45 # 178.68 # profindex or longitude
         CASE_STUDY_NAME = None # None
-    VERSION_CAL_LID_L1 = "V4.10"
-    VERSION_CAL_LID_L2 = "V4.20"
+    VERSION_CAL_LID_L1 = "V4.51"
+    VERSION_CAL_LID_L2 = "V4.51"
     TYPE_CAL_LID_L1 = "Standard"
     TYPE_CAL_LID_L2 = "Standard"
     #-----------------------------------------------------------------------
@@ -4140,8 +4140,8 @@ if __name__ == '__main__':
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
-    YMIN = 0
-    YMAX = 15 # None
+    YMIN = 15
+    YMAX = 30 # None
     COLORMAP = "FRIENDLY" # "LEGACY": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
     PLOT_ASPECT_RATIO = "browse_colorbar_right" # "browse_colorbar_right", "browse_colorbar_bottom", "spec" or None
@@ -4180,14 +4180,14 @@ if __name__ == '__main__':
     PLOT_ASR_532_PAR_ABOVE_STD    = False
     PLOT_ASR_532_PER_ABOVE_STD    = False
     PLOT_ASR_1064_ABOVE_STD       = False
-    PLOT_PARAMS_532_PAR           = True
+    PLOT_PARAMS_532_PAR           = False
     PLOT_PARAMS_532_PER           = False   
     PLOT_PARAMS_1064              = False
     PLOT_NB_BINS_SHIFT            = False
     PLOT_VFM_FEATURE_TYPE         = True
-    PLOT_VFM_HORIZONTAL_AVERAGING = True
+    PLOT_VFM_HORIZONTAL_AVERAGING = False
     PLOT_VFM_PHASE                = False
-    PLOT_VFM_SUBTYPE              = True
+    PLOT_VFM_SUBTYPE              = False
     PLOT_FEATURE_DR               = False
     PLOT_FEATURE_DR1064           = False
     PLOT_FEATURE_ACR              = False

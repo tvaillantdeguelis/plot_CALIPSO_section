@@ -169,17 +169,17 @@ if __name__ == '__main__':
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
     INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
-    GRANULE_DATE = "2010-01-18T00-19-57ZN"
+    GRANULE_DATE = sys.argv[1] #"2010-01-18T00-19-57ZN"
     VERSION_CAL_LID_L2_PSCMask = "V2.00"
     TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
-    SLICE_START = 170.59 # profindex or longitude
-    SLICE_END = 27.95 # profindex or longitude
+    SLICE_START = float(sys.argv[2]) # 170.59 # profindex or longitude
+    SLICE_END = float(sys.argv[3]) # 27.95 # profindex or longitude
     EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
     INVERT_XAXIS = False
     YMIN = 15
     YMAX = 30
-    FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
+    FIGURES_PATH = sys.argv[4] #"/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     
     
