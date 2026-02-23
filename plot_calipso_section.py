@@ -19,6 +19,7 @@ import matplotlib.patheffects as pe
 import cmocean
 import cmlidar
 
+sys.path.append("./my_modules/")
 from standard_outputs import print_time
 from readers.calipso_reader import CALIOPRegularGridReader
 from figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
@@ -4124,11 +4125,11 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2011-01-04T04-30-38ZN" # "2009-02-10T12-33-03ZN"
+        GRANULE_DATE = "2010-01-18T00-19-57ZN" # "2009-02-10T12-33-03ZN"
         FOLDER_PATH = None #"/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/in/CAL_LID_L1_denoised/" #None # if None, it will try automatic path detection based on information in paths.py
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = 111.59 # -168.15 # profindex or longitude
-        SLICE_END = -35.45 # 178.68 # profindex or longitude
+        SLICE_START = 170.59 # -168.15 # profindex or longitude
+        SLICE_END = 27.95 # 178.68 # profindex or longitude
         CASE_STUDY_NAME = None # None
     VERSION_CAL_LID_L1 = "V4.51"
     VERSION_CAL_LID_L2 = "V4.51"
@@ -4140,7 +4141,7 @@ if __name__ == '__main__':
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
-    YMIN = 15
+    YMIN = 8.4
     YMAX = 30 # None
     COLORMAP = "FRIENDLY" # "LEGACY": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
@@ -4184,7 +4185,7 @@ if __name__ == '__main__':
     PLOT_PARAMS_532_PER           = False   
     PLOT_PARAMS_1064              = False
     PLOT_NB_BINS_SHIFT            = False
-    PLOT_VFM_FEATURE_TYPE         = True
+    PLOT_VFM_FEATURE_TYPE         = False
     PLOT_VFM_HORIZONTAL_AVERAGING = False
     PLOT_VFM_PHASE                = False
     PLOT_VFM_SUBTYPE              = False
