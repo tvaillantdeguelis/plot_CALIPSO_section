@@ -244,12 +244,12 @@ if __name__ == '__main__':
         FIGURES_PATH = sys.argv[4] #"/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     else:
         INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
-        GRANULE_DATE = "2010-01-18T00-19-57ZN"
-        VERSION_CAL_LID_L2_PSCMask = "V2.00"
+        GRANULE_DATE = "2022-07-21T01-49-09ZN"
+        VERSION_CAL_LID_L2_PSCMask = "V3.00"
         TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
-        SLICE_START = 170.59 # profindex or longitude
-        SLICE_END = 27.95 # profindex or longitude
+        SLICE_START = -6.01 # profindex or longitude
+        SLICE_END = -118.07 # profindex or longitude
         EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
         INVERT_XAXIS = False
         YMIN = 8.4
@@ -281,12 +281,12 @@ if __name__ == '__main__':
     granule_names = []
     for i_filenames in np.arange(l1_input_filenames.shape[0]):
         granule_name = ''
-        if VERSION_CAL_LID_L2_PSCMask == "V2.00":
+        if VERSION_CAL_LID_L2_PSCMask in ("V2.00", "V3.00"):
             granule_name_char_indexes = np.arange(26, 47)
         elif VERSION_CAL_LID_L2_PSCMask == "V1.00":
             granule_name_char_indexes = np.arange(27, 48)
         else:
-            sys.exit(f"Define 'granule_name_char_indexes' for VERSION_CAL_LID_L2_PSCMask = {VERSION_CAL_LID_L2_PSCMask}")
+            raise ValueError(f"Define 'granule_name_char_indexes' for VERSION_CAL_LID_L2_PSCMask = {VERSION_CAL_LID_L2_PSCMask}")
         for i_char in granule_name_char_indexes:
             granule_name = granule_name + l1_input_filenames[i_filenames][i_char].decode('UTF-8')
         granule_names.append(granule_name)

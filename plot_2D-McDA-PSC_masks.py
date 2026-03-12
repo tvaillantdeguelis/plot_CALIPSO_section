@@ -51,16 +51,17 @@ class FigureMaker(CALIOPFigureMaker):
 
         # Labels
         clabels = ["No\ndetect.",] +\
-                  ["%d" % i for i in np.arange(self.max_detect_level)+1] 
-                #   ["No detection",] +\
-                #   ["Detection level %d" % i for i in np.arange(self.max_detect_level)+1] 
+                  ["%d" % i for i in np.arange(self.max_detect_level)+1] +\
+                  ["Invalid"]
+
 
         # Colormap
         nb_colors = self.max_detect_level
         palette = sns.cubehelix_palette(nb_colors, start=2, rot=1, hue=1., gamma=1., light=0.8,
                                         dark=0.2, reverse=True)
         palette.insert(0, [1.0, 1.0, 1.0]) # 0 = Nothing
-        colorbins = np.array((-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5))
+        palette.append([0.5, 0.5, 0.5])  # last color = grey for 255
+        colorbins = np.array((-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 256))
         my_cmap = mpl.colors.ListedColormap(palette)
         my_norm = mpl.colors.BoundaryNorm(colorbins, my_cmap.N)
     
@@ -213,6 +214,7 @@ class FigureMaker(CALIOPFigureMaker):
         5 = 532 par + 1064
         6 = 532 per + 1064
         7 = all three
+        255 = invalid
         """
 
         clabels = [
@@ -224,21 +226,23 @@ class FigureMaker(CALIOPFigureMaker):
             "532 par + 1064",
             "532 per + 1064",
             "532 par + 532 per + 1064",
+            "Invalid"
         ]
 
         palette = [
-                   [1.0,           1.0,      1.0], # 1: No detection (white)
-                   [0.9,           0.0,      0.0], # 2: 532 par only (red)
-                   [0.9,           0.9,      0.0], # 3: 532 per only (yellow)
-                   [135./255, 206./255, 235./255], # 4: 1064 only (blue)
-                   [255./255, 140./255,   0./255], # 5: 532 par + 532 per (orange)
-                   [102./255,   0./255, 153./255], # 6: 532 par + 1064 (violet)
-                   [152./255, 251./255, 152./255], # 7: 532 per + 1064 (green)
-                   [0.0,           0.0,      0.0]  # 8: 532 par + 532 per + 1064 (black)
+                   [1.0,           1.0,      1.0], # 0: No detection (white)
+                   [0.9,           0.0,      0.0], # 1: 532 par only (red)
+                   [0.9,           0.9,      0.0], # 2: 532 per only (yellow)
+                   [135./255, 206./255, 235./255], # 3: 1064 only (blue)
+                   [255./255, 140./255,   0./255], # 4: 532 par + 532 per (orange)
+                   [102./255,   0./255, 153./255], # 5: 532 par + 1064 (violet)
+                   [152./255, 251./255, 152./255], # 6: 532 per + 1064 (green)
+                   [0.0,           0.0,      0.0], # 7: 532 par + 532 per + 1064 (black)
+                   [0.5,           0.5,      0.5]  # 255: Invalid (grey)
         ]
 
         cmap = mpl.colors.ListedColormap(palette)
-        colorbins = np.arange(len(palette) + 1) - 0.5
+        colorbins = np.array([-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 256])
         norm = mpl.colors.BoundaryNorm(colorbins, cmap.N)
 
         # Figure style
@@ -278,13 +282,13 @@ if __name__ == '__main__':
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
     INDATA_FOLDER = "/home/vaillant/codes/projects/2D_McDA_PSC/out/data/"
-    GRANULE_DATE = "2011-06-20T13-04-28ZN"
-    GRANULE_SECTION = "_lon_172.82_16.65" # void if complete file
-    VERSION_2D_McDA = "V1.4.4"
+    GRANULE_DATE = "2022-07-21T01-49-09ZN"
+    GRANULE_SECTION = "_lon_-1.01_-158.81" # void if complete file
+    VERSION_2D_McDA = "V1.5.0"
     TYPE_2D_McDA = "Prototype"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the 2D-McDA file) or 'longitude'
-    SLICE_START = 172.82 # profindex or longitude
-    SLICE_END = 16.65 # profindex or longitude
+    SLICE_START = -6.01 # profindex or longitude
+    SLICE_END = -118.07 # profindex or longitude
     EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
     MAX_DETECT_LEVEL = 5
     PLOT_ALL_STEPS = False
@@ -314,7 +318,7 @@ if __name__ == '__main__':
 
     # Open netCDF file
     print(f"\tGranule path: {ncfile}")
-    ds_2d_mcda = xr.open_dataset(ncfile)
+    ds_2d_mcda = xr.open_dataset(ncfile, mask_and_scale=False)
 
     # Get prof_min and prof_max from longitudes
     lat_granule = ds_2d_mcda["Latitude"].values
@@ -437,6 +441,17 @@ if __name__ == '__main__':
             (det_perp >= 1).astype(int) * 2 +
             (det_1064 >= 1).astype(int) * 4
         )
+
+        # Detect pixels invalid in all channels
+        invalid_all = (
+            (det_par  == 255) &
+            (det_perp == 255) &
+            (det_1064 == 255)
+        )
+
+        # Assign invalid value
+        composite_mask_channel[invalid_all] = 255
+
         plot_fig.plot_composite_mask_channel(composite_mask_channel)
     
 

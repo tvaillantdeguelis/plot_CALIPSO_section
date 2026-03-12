@@ -4125,19 +4125,19 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2010-01-18T00-19-57ZN" # "2009-02-10T12-33-03ZN"
+        GRANULE_DATE = "2022-07-21T01-49-09ZN" # "2009-02-10T12-33-03ZN"
         FOLDER_PATH = None #"/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/in/CAL_LID_L1_denoised/" #None # if None, it will try automatic path detection based on information in paths.py
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = 170.59 # -168.15 # profindex or longitude
-        SLICE_END = 27.95 # 178.68 # profindex or longitude
+        SLICE_START = -6.01 # -168.15 # profindex or longitude
+        SLICE_END = -118.07 # 178.68 # profindex or longitude
         CASE_STUDY_NAME = None # None
-    VERSION_CAL_LID_L1 = "V4.51"
-    VERSION_CAL_LID_L2 = "V4.51"
+    VERSION_CAL_LID_L1 = "V5.00"
+    VERSION_CAL_LID_L2 = "V5.00"
     TYPE_CAL_LID_L1 = "Standard"
     TYPE_CAL_LID_L2 = "Standard"
     #-----------------------------------------------------------------------
     # Plot configuration
-    REGULAR_GRIDS = ['5kmx60m',] # ['333mx30m', '1kmx60m', '5kmx60m'] # list of regular grids to plot
+    REGULAR_GRIDS = ['333mx30m',] # ['333mx30m', '1kmx60m', '5kmx60m'] # list of regular grids to plot
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
@@ -4151,7 +4151,7 @@ if __name__ == '__main__':
     #-----------------------------------------------------------------------
     # Plot flags
     PLOT_MAP                      = True
-    PLOT_AB_532                   = True
+    PLOT_AB_532                   = False
     PLOT_AB_532_HIST              = False
     PLOT_AB_532_PAR               = True
     PLOT_AB_532_PAR_HIST          = False
@@ -4159,8 +4159,8 @@ if __name__ == '__main__':
     PLOT_AB_532_PER_HIST          = False
     PLOT_AB_1064                  = True
     PLOT_AB_1064_HIST             = False
-    PLOT_ACR                      = True
-    PLOT_DR                       = True
+    PLOT_ACR                      = False
+    PLOT_DR                       = False
     PLOT_AB_MOL_532               = False
     PLOT_AB_MOL_532_PAR           = False
     PLOT_AB_MOL_532_PER           = False
@@ -4181,11 +4181,11 @@ if __name__ == '__main__':
     PLOT_ASR_532_PAR_ABOVE_STD    = False
     PLOT_ASR_532_PER_ABOVE_STD    = False
     PLOT_ASR_1064_ABOVE_STD       = False
-    PLOT_PARAMS_532_PAR           = False
+    PLOT_PARAMS_532_PAR           = True
     PLOT_PARAMS_532_PER           = False   
     PLOT_PARAMS_1064              = False
     PLOT_NB_BINS_SHIFT            = False
-    PLOT_VFM_FEATURE_TYPE         = False
+    PLOT_VFM_FEATURE_TYPE         = True
     PLOT_VFM_HORIZONTAL_AVERAGING = False
     PLOT_VFM_PHASE                = False
     PLOT_VFM_SUBTYPE              = False
