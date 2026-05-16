@@ -1953,13 +1953,13 @@ class FigureMaker(CALIOPFigureMaker):
         deconv_txt = "(deconvoluted)" if APPLY_DECONVOLUTION else ""
         if wl == 532:
             if polar == 'par':
-                title = "Parallel 532 nm Attenuated Backscatter $\mathit{\\beta'_{532,\\parallel}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
+                title = r"Parallel 532 nm Attenuated Backscatter $\mathit{\beta'_{532,\parallel}}$" + f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
             elif polar == 'per':
-                title = "Perpendicular 532 nm Attenuated Backscatter $\mathit{\\beta'_{532,\\bot}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
+                title = r"Perpendicular 532 nm Attenuated Backscatter $\mathit{\beta'_{532,\bot}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
             else:
-                title = "Total 532 nm Attenuated Backscatter $\mathit{\\beta'_{532}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
+                title = r"Total 532 nm Attenuated Backscatter $\mathit{\beta'_{532}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
         elif wl == 1064:
-            title = f"1064 nm Attenuated Backscatter"+" $\mathit{\\beta'_{1064}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
+            title = f"1064 nm Attenuated Backscatter"+r" $\mathit{\beta'_{1064}}$"+f" ({VERSION_CAL_LID_L1}) {deconv_txt}"
         plt.title(title, fontweight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
         if self.colorbar_position == 'right':
@@ -1980,7 +1980,7 @@ class FigureMaker(CALIOPFigureMaker):
             cbar.ax.tick_params(which='both', labelright=False)
             # Major labels
             #cbar_major_label = bounds[bounds_major_index]
-            cbar_major_label = ['$\mathbf{×10^{-4}}$', '$\mathbf{×10^{-3}}$', '$\mathbf{×10^{-2}}$', '$\mathbf{×10^{-1}}$']
+            cbar_major_label = [r'$\mathbf{×10^{-4}}$', r'$\mathbf{×10^{-3}}$', r'$\mathbf{×10^{-2}}$', r'$\mathbf{×10^{-1}}$']
             for j, lab in enumerate(cbar_major_label):
                 cbar.ax.text(3.5, cbar_major[j], lab, va='center', fontsize=self.ytick_labelsize)
                 # Minor labels
@@ -2467,7 +2467,7 @@ class FigureMaker(CALIOPFigureMaker):
         elif colormap_style in [81, 83]:
             cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
             cbar.ax.tick_params(which='both', labelright=False)
-            cbar_major_label = ['$\mathbf{×10^{-5}}$', '$\mathbf{×10^{-4}}$', '$\mathbf{×10^{-3}}$', '$\mathbf{×10^{-2}}$']
+            cbar_major_label = [r'$\mathbf{×10^{-5}}$', r'$\mathbf{×10^{-4}}$', r'$\mathbf{×10^{-3}}$', r'$\mathbf{×10^{-2}}$']
             c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
             for j, bound in enumerate(c_bar_major_values):
                 if PLOT_ASPECT_RATIO == "spec":
@@ -2534,7 +2534,7 @@ class FigureMaker(CALIOPFigureMaker):
         elif colormap_style in [1000, 1001]:
             cbar.ax.yaxis.set_major_locator(LogLocator(numticks=15))
             cbar.ax.tick_params(which='both', labelright=False)
-            cbar_major_label = ['$\mathbf{×10^{-5}}$', '$\mathbf{×10^{-4}}$', '$\mathbf{×10^{-3}}$', '$\mathbf{×10^{-2}}$']
+            cbar_major_label = [r'$\mathbf{×10^{-5}}$', r'$\mathbf{×10^{-4}}$', r'$\mathbf{×10^{-3}}$', r'$\mathbf{×10^{-2}}$']
             c_bar_major_values = np.array((1e-5, 1e-4, 1e-3, 1e-2))
             for j, bound in enumerate(c_bar_major_values):
                 if PLOT_ASPECT_RATIO == "spec":
@@ -2750,7 +2750,7 @@ class FigureMaker(CALIOPFigureMaker):
         # print('acr:', colors)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_dist=True, flag_granule=False)
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
-        plt.title("Attenuated Color Ratio $\mathit{\\frac{\\beta'_{1064}}{\\beta'_{532}}}$"+f" ({VERSION_CAL_LID_L1})", 
+        plt.title(r"Attenuated Color Ratio $\mathit{\frac{\beta'_{1064}}{\beta'_{532}}}$"+f" ({VERSION_CAL_LID_L1})", 
                   fontweight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
         ax1 = plt.subplot(gs0[1])
         if self.colorbar_position == 'right':
@@ -3104,7 +3104,7 @@ class FigureMaker(CALIOPFigureMaker):
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=False)
         # self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_dist=False)
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
-        plt.title("Depolarization Ratio $\mathit{\\frac{\\beta'_{\perp}}{\\beta'_{\parallel}}}$"+f" ({VERSION_CAL_LID_L1})",
+        plt.title(r"Depolarization Ratio $\mathit{\frac{\beta'_{\perp}}{\beta'_{\parallel}}}$"+f" ({VERSION_CAL_LID_L1})",
                   fontweight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
         # colorbar_name = "Current"
         # plt.title("$\mathbf{%s}$" % colorbar_name, y=1.03)
@@ -3229,7 +3229,7 @@ class FigureMaker(CALIOPFigureMaker):
             polar_txt = '(perpendicular)'
         else:
             polar_txt = ''
-        plt.title('$\mathbf{Estimated\ molecular\ attenuated\ backscatter\ at\ %d\ nm\ %s}$'\
+        plt.title(r'$\mathbf{Estimated\ molecular\ attenuated\ backscatter\ at\ %d\ nm\ %s}$'\
                     % (wl, polar_txt), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         # plt.text(0.02, 0.85, f"({grid})", ha='left', va='center', transform=fig.transFigure)
         ax1 = plt.subplot(gs0[1])
@@ -3470,12 +3470,12 @@ class FigureMaker(CALIOPFigureMaker):
         cbar = plt.colorbar(pc, cax=ax1, orientation=cbar_orientation, drawedges=True)
         # cbar.ax.set_yticklabels([' ']) # Delete colorbar number label
         cbar.ax.tick_params(which='both', right=False, labelright=False)
-        for j, lab in enumerate(['Invalid', 'Clear', 'Cloud', 'Tropospheric Aerosol',
-                                'Stratospheric Aerosol', 'Surface', 'Subsurface',
-                                'Fully Attenuated']):
+        for j, lab in enumerate(['Invalid', 'Clear', 'Cloud', 'Tropospheric\nAerosol',
+                                'Stratospheric\nAerosol', 'Surface', 'Subsurface',
+                                'Fully\nAttenuated']):
             cbar.ax.text(1.5, 1/(float(colorbins.size-1)*2) +
                                 j/float(colorbins.size-1), lab, va='center',
-                                fontsize=4, transform=ax1.transAxes)
+                                fontsize=7, transform=ax1.transAxes)
 
         # Save figure
         filename = f"VFM"
@@ -3801,16 +3801,16 @@ class FigureMaker(CALIOPFigureMaker):
         fig_h = cm2in(20) # cm
         
         if wv==532:
-            wv_txt = '532\ nm\ '
+            wv_txt = r'532\ nm\ '
         elif wv==1064:
-            wv_txt = '1064\ nm\ '
+            wv_txt = r'1064\ nm\ '
         else:
             wv_txt = ''
 
         if polar=='par':
-            polar_txt_long = 'Parallel\ '
+            polar_txt_long = r'Parallel\ '
         elif polar=='per':
-            polar_txt_long = 'Perpendicular\ '
+            polar_txt_long = r'Perpendicular\ '
         else:
             polar_txt = ''
             polar_txt_long = ''
@@ -3825,7 +3825,7 @@ class FigureMaker(CALIOPFigureMaker):
         plt.ylabel('Energy (mJ)')
         lat_lon_dist_xaxis(ax, self.lat, self.lon, self.pindex, self.pindexbins,
                            flag_lat_lon_label=False, flag_dist=True, flag_dist_label=True)
-        plt.title("$\mathbf{%sLaser\ Energy}$" % wv_txt)
+        plt.title(r"$\mathbf{%sLaser\ Energy}$" % wv_txt)
 
         # Calibration constant
         ax = plt.subplot(gs0[1])
@@ -3833,16 +3833,16 @@ class FigureMaker(CALIOPFigureMaker):
         lat_lon_dist_xaxis(ax, self.lat, self.lon, self.pindex, self.pindexbins,
                            flag_lat_lon_label=False, flag_dist=True, flag_dist_label=False)
         plt.xlabel('')
-        plt.title("$\mathbf{%sCalibration\ Constant}$" % wv_txt)
+        plt.title(r"$\mathbf{%sCalibration\ Constant}$" % wv_txt)
 
         # Gain
         ax = plt.subplot(gs0[2])
         plt.plot(self.pindex, Ga)
-        plt.ylabel('Gain (V $\mathrm{V^{-1}}$)')
+        plt.ylabel(r'Gain (V $\mathrm{V^{-1}}$)')
         lat_lon_dist_xaxis(ax, self.lat, self.lon, self.pindex, self.pindexbins,
                            flag_lat_lon_label=False, flag_dist=True, flag_dist_label=False)
         plt.xlabel('')
-        plt.title("$\mathbf{%s%sAmplifier\ Gain}$" % (wv_txt, polar_txt_long))
+        plt.title(r"$\mathbf{%s%sAmplifier\ Gain}$" % (wv_txt, polar_txt_long))
 
         # RMS baseline
         ax = plt.subplot(gs0[3])
@@ -3851,14 +3851,14 @@ class FigureMaker(CALIOPFigureMaker):
         lat_lon_dist_xaxis(ax, self.lat, self.lon, self.pindex, self.pindexbins,
                            flag_lat_lon_label=False, flag_dist=True, flag_dist_label=False)
         plt.xlabel('')
-        plt.title("$\mathbf{%s%sRMS\ Baseline}$" % (wv_txt, polar_txt_long))
+        plt.title(r"$\mathbf{%s%sRMS\ Baseline}$" % (wv_txt, polar_txt_long))
 
         # NSF
         ax = plt.subplot(gs0[4])
         plt.plot(self.pindex, nsf)
         lat_lon_dist_xaxis(ax, self.lat, self.lon, self.pindex, self.pindexbins,
                            flag_lat_lon_label=True, flag_dist=True, flag_dist_label=False)
-        plt.title("$\mathbf{%s%sNoise\ Scale\ Factor}$" % (wv_txt, polar_txt_long))
+        plt.title(r"$\mathbf{%s%sNoise\ Scale\ Factor}$" % (wv_txt, polar_txt_long))
 
         # Save figure
         filename = f"param{wv:d}{polar}"
@@ -4125,11 +4125,11 @@ if __name__ == '__main__':
         SLICE_END = float(sys.argv[4])
         CASE_STUDY_NAME = sys.argv[5]
     else:
-        GRANULE_DATE = "2022-07-21T01-49-09ZN" # "2009-02-10T12-33-03ZN"
+        GRANULE_DATE = "2008-06-27T06-29-34ZN" # "2009-02-10T12-33-03ZN"
         FOLDER_PATH = None #"/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/in/CAL_LID_L1_denoised/" #None # if None, it will try automatic path detection based on information in paths.py
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = -6.01 # -168.15 # profindex or longitude
-        SLICE_END = -118.07 # 178.68 # profindex or longitude
+        SLICE_START = -89.99 # -168.15 # profindex or longitude
+        SLICE_END = 116.98 # 178.68 # profindex or longitude
         CASE_STUDY_NAME = None # None
     VERSION_CAL_LID_L1 = "V5.00"
     VERSION_CAL_LID_L2 = "V5.00"
@@ -4159,8 +4159,8 @@ if __name__ == '__main__':
     PLOT_AB_532_PER_HIST          = False
     PLOT_AB_1064                  = True
     PLOT_AB_1064_HIST             = False
-    PLOT_ACR                      = False
-    PLOT_DR                       = False
+    PLOT_ACR                      = True
+    PLOT_DR                       = True
     PLOT_AB_MOL_532               = False
     PLOT_AB_MOL_532_PAR           = False
     PLOT_AB_MOL_532_PER           = False

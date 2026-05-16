@@ -145,7 +145,7 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(f'PSC mask {VERSION_CAL_LID_L2_PSCMask}', weight='bold', y=self.axes_title_pad)
+        plt.title(f'PSC mask {VERSION_CAL_LID_L2_PSCMask}', weight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
 
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -231,25 +231,25 @@ if __name__ == '__main__':
     # PARAMETERS
     if len(sys.argv) > 1:
         INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
-        GRANULE_DATE = sys.argv[1] #"2008-01-01T06-26-59ZN"
+        GRANULE_DATE = sys.argv[1]
         VERSION_CAL_LID_L2_PSCMask = "V2.00"
         TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
-        SLICE_START = float(sys.argv[2]) # 170.59 # profindex or longitude
-        SLICE_END = float(sys.argv[3]) # 27.95 # profindex or longitude
+        SLICE_START = float(sys.argv[2]) # profindex or longitude
+        SLICE_END = float(sys.argv[3]) # profindex or longitude
         EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
         INVERT_XAXIS = False
-        YMIN = 15
+        YMIN = 8.4
         YMAX = 30
         FIGURES_PATH = sys.argv[4] #"/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     else:
         INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
-        GRANULE_DATE = "2022-07-21T01-49-09ZN"
+        GRANULE_DATE = "2010-01-18T00-19-57ZN"
         VERSION_CAL_LID_L2_PSCMask = "V3.00"
         TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
         SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
-        SLICE_START = -6.01 # profindex or longitude
-        SLICE_END = -118.07 # profindex or longitude
+        SLICE_START = 170.59 # profindex or longitude
+        SLICE_END = 27.95 # profindex or longitude
         EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
         INVERT_XAXIS = False
         YMIN = 8.4

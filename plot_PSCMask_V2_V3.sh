@@ -30,5 +30,5 @@ find "$FOLDER" -type f -name "CAL_LID_L2_2D_McDA_PSC-Prototype*.hdf" | sort | wh
 
     # Call the Python script with the granule
     echo "$granule $lon_start $lon_end"
-    ./plot_psc_mask.py "$granule" "$lon_start" "$lon_end" "$FIGURES_PATH"
+    ./plot_PSCMask_V2_V3.py "$granule" "$lon_start" "$lon_end" "$FIGURES_PATH"
 done

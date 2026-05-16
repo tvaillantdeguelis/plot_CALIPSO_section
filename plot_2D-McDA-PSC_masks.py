@@ -78,11 +78,11 @@ class FigureMaker(CALIOPFigureMaker):
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=FLAG_GRANULE)
         if channel == '532_par':
-            title = "2D-McDA-PSC 532 nm parallel detection feature mask"
+            title = f"2D-McDA-PSC {VERSION_2D_McDA} 532 nm parallel detection feature mask"
         elif channel == '532_per':
-            title = "2D-McDA-PSC 532 nm perpendicular detection feature mask"
+            title = f"2D-McDA-PSC {VERSION_2D_McDA} 532 nm perpendicular detection feature mask"
         elif channel == '1064':
-            title = "2D-McDA-PSC 1064 nm detection feature mask"
+            title = f"2D-McDA-PSC {VERSION_2D_McDA} 1064 nm detection feature mask"
         else:
             raise ValueError(f"Unknown channel = {channel}")
         plt.title(title, fontweight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
@@ -127,8 +127,7 @@ class FigureMaker(CALIOPFigureMaker):
 
 
     def plot_ab_signal(self, ab_signal, title, filename):
-        # sourcery skip: merge-comparisons, merge-duplicate-blocks, remove-redundant-if
-        
+
         # Mask where fill_value
         ab_signal = np.ma.masked_where(ab_signal == FILL_VALUE_FLOAT, ab_signal)
     
@@ -203,6 +202,85 @@ class FigureMaker(CALIOPFigureMaker):
         plt.close(fig)
 
 
+    def plot_sr_signal(self, sr_signal, title, filename):
+
+        # Mask where fill_value
+        sr_signal = np.ma.masked_where(sr_signal == FILL_VALUE_FLOAT, sr_signal)
+    
+        # Remove edges
+        if self.edges_removal != 0: # to avoid error with "-0"
+            sr_signal = remove_edges(sr_signal, self.edges_removal)
+    
+        # Figure style
+        setstyle("ticks_nogrid")
+    
+        # Create figure
+        fig = plt.figure(figsize=(self.fig_w, self.fig_h))
+        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+    
+        # Plot figure
+        ax0 = plt.subplot(gs0[0])
+        ax0.set_facecolor('0.5')
+
+        # Put negative values to 1e-9 so they don't appear transparent
+        sr_signal[(sr_signal<0) & ~sr_signal.mask] = 1e-9
+        plt.title(title, weight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        my_cmap = cmocean.cm.thermal
+        my_cmap.colorbar_extend = 'both'
+        pc = plt.pcolormesh(self.pindexbins, self.altbins, sr_signal.T, cmap=my_cmap, norm=LogNorm(), rasterized=True)
+        plt.clim(1, 10)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=FLAG_GRANULE)
+        
+        # Plot colorbar
+        ax1 = plt.subplot(gs0[1])
+        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', extend='both', drawedges=False)
+        cbar.set_label(label=r"Scattering ratio", labelpad=5)
+
+        # Save figure
+        self.save_fig(filename)
+        
+        # Close figure
+        plt.close(fig)
+
+
+    def plot_temperature(self, temperature, title, filename):
+
+        # Mask where fill_value
+        temperature = np.ma.masked_where(temperature == FILL_VALUE_FLOAT, temperature)
+    
+        # Remove edges
+        if self.edges_removal != 0: # to avoid error with "-0"
+            temperature = remove_edges(temperature, self.edges_removal)
+    
+        # Figure style
+        setstyle("ticks_nogrid")
+    
+        # Create figure
+        fig = plt.figure(figsize=(self.fig_w, self.fig_h))
+        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+    
+        # Plot figure
+        ax0 = plt.subplot(gs0[0])
+        ax0.set_facecolor('0.5')
+        plt.title(title, weight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        my_cmap = cmocean.cm.thermal
+        my_cmap.colorbar_extend = 'both'
+        pc = plt.pcolormesh(self.pindexbins, self.altbins, temperature.T, cmap=my_cmap, rasterized=True)
+        plt.clim(180, 220)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=FLAG_GRANULE)
+        
+        # Plot colorbar
+        ax1 = plt.subplot(gs0[1])
+        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', extend='both', drawedges=False)
+        cbar.set_label(label=r"Temperature (K)", labelpad=5)
+
+        # Save figure
+        self.save_fig(filename)
+        
+        # Close figure
+        plt.close(fig)
+
+
     def plot_composite_mask_channel(self, mask):
         """
         mask values:
@@ -216,16 +294,16 @@ class FigureMaker(CALIOPFigureMaker):
         7 = all three
         255 = invalid
         """
-
+        label_all_channel = r"532$\mathrm{\parallel}$ + 532$\mathrm{\bot}$ + 1064"
         clabels = [
             "No detection",
-            "532 par",
-            "532 per",
-            "532 par + 532 per",
-            "1064",
-            "532 par + 1064",
-            "532 per + 1064",
-            "532 par + 532 per + 1064",
+            r"532$\mathrm{\parallel}$",
+            r"532$\mathrm{\bot}$",
+            r"532$\mathrm{\parallel}$ + 532$\mathrm{\bot}$",
+            r"1064",
+            r"532$\mathrm{\parallel}$ + 1064",
+            r"532$\mathrm{\bot}$ + 1064",
+            label_all_channel,
             "Invalid"
         ]
 
@@ -257,7 +335,125 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T,
                         cmap=cmap, norm=norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=FLAG_GRANULE)
-        plt.title("2D-McDA-PSC composite detection mask (by channel)", fontweight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        plt.title(f"2D-McDA-PSC {VERSION_2D_McDA} composite detection mask (by channel)", fontweight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
+
+        # Plot colorbar
+        ax1 = plt.subplot(gs0[1])
+        cbar = plt.colorbar(pc, cax=ax1, orientation='vertical', drawedges=True)
+        cbar.ax.tick_params(axis='y', which='both', right=False, labelright=False)
+        for j, lab in enumerate(clabels):
+            cbar.ax.text(1.5, 1/(float(colorbins.size-1)*2) + j/float(colorbins.size-1), lab,
+                         va='center', fontsize=4 if lab==label_all_channel else 7, transform=cbar.ax.transAxes)
+
+        # Save figure
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_composite_channel_mask"
+        self.save_fig(filename)
+        
+        # Close figure
+        plt.close(fig)
+
+
+    def plot_psc_composition(self, mask, temp, plot_temp=False, plot_tropopause=False):
+        # Remove edges
+        if self.edges_removal != 0: # to avoid error with "-0"
+            mask = remove_edges(mask, self.edges_removal)
+
+        # PSC class values in the desired display order
+        psc_values = [
+            -4,  # Likely tropo.
+            -1,  # Not determinable
+            0,  # No detection
+            3,  # SBS
+            1,  # STS
+            2,  # NAT
+            4,  # Ice
+            5,  # Enhanced NAT
+            6   # Wave ice
+        ]
+
+        # Labels
+        clabels = [
+            "Likely tropo.",   # -4
+            "Not determinable",# -1
+            "No detection",    # 0
+            "SBS",             # 3
+            "STS",             # 1
+            "NAT",             # 2
+            "Ice",             # 4
+            "Enhanced NAT",    # 5
+            "Wave ice"         # 6
+        ]
+
+        # Color palette associated with each class
+        palette = [
+            "#000000",  # Likely tropo.
+            "#FFFFFF",  # Not determinable
+            "#444444",  # No detection
+            "#888888",  # SBS
+            "#00FA9A",  # STS
+            "#FFFF00",  # NAT
+            "#00BBFF",  # Ice
+            "#FF0000",  # Enhanced NAT
+            "#4700C3"   # Wave ice
+        ]
+
+        # Create a mapping between PSC values and ordered indices
+        mapping = {value: index for index, value in enumerate(psc_values)}
+
+        # Convert original PSC values into ordered indices
+        # Example:
+        #   -4 -> 0
+        #   -1 -> 1
+        #    0 -> 2
+        #    3 -> 3
+        #    1 -> 4
+        # etc.
+        mask_plot = np.vectorize(mapping.get)(mask)
+
+        # Create colormap
+        my_cmap = mpl.colors.ListedColormap(palette)
+
+        # Define color boundaries for ordered indices
+        colorbins = np.arange(len(clabels) + 1) - 0.5
+
+        # Create normalization
+        my_norm = mpl.colors.BoundaryNorm(colorbins, my_cmap.N)
+
+    
+        # Figure style
+        setstyle("ticks_nogrid")
+    
+        # Create figure
+        fig = plt.figure(figsize=(self.fig_w, self.fig_h))
+        gs0 = gridspec.GridSpec(1, 2, width_ratios=[50, 1], wspace=0.1)
+    
+        # Plot figure
+        ax0 = plt.subplot(gs0[0])
+        pc = plt.pcolormesh(self.pindexbins, self.altbins, mask_plot.T, cmap=my_cmap,
+                            norm=my_norm, rasterized=True)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=FLAG_GRANULE)
+        plt.title(f'2D-McDA-PSC {VERSION_2D_McDA} PSC composition', weight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        
+        if plot_temp:
+            APPLY_SMOOTH = False
+            SIGMA = (1, 1)   # (vertical, horizontal)
+            temp_to_plot = temp.copy()
+            if APPLY_SMOOTH:
+                from scipy.ndimage import gaussian_filter
+                temp_to_plot = gaussian_filter(temp_to_plot, sigma=SIGMA)
+            x_centers = 0.5 * (self.pindexbins[:-1] + self.pindexbins[1:])
+            y_centers = 0.5 * (self.altbins[:-1] + self.altbins[1:])
+            levels = np.arange(150, 250, 5)
+            cs = ax0.contour(x_centers, y_centers, temp_to_plot.T, levels=levels, colors='white', linewidths=0.8)
+            ax0.clabel(cs, fmt='%d K', colors='white', fontsize=8)
+        
+        if plot_tropopause:
+            x_centers = 0.5 * (self.pindexbins[:-1] + self.pindexbins[1:])
+            tropopause_alt = data_dict_cal_2d_mcda["Tropopause_Altitude_MERRA2"] 
+            ax0.plot(x_centers, tropopause_alt, c="w", lw=1.5, ls="-", zorder=10, label="Tropopause")
+            i_mid = len(x_centers) // 2
+            ax0.text(x_centers[i_mid], tropopause_alt[i_mid] + 1.0,
+                     "Tropopause", color="white", fontsize=10, ha="center", va="bottom", zorder=11, weight="bold")
 
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -267,9 +463,9 @@ class FigureMaker(CALIOPFigureMaker):
         for j, lab in enumerate(clabels):
             cbar.ax.text(1.5, 1/(float(colorbins.size-1)*2) + j/float(colorbins.size-1), lab,
                          va='center', fontsize=fontsize_clabel, transform=cbar.ax.transAxes)
-
+        
         # Save figure
-        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_composite_channel_mask"
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_PSC_composition"
         self.save_fig(filename)
         
         # Close figure
@@ -282,16 +478,15 @@ if __name__ == '__main__':
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
     INDATA_FOLDER = "/home/vaillant/codes/projects/2D_McDA_PSC/out/data/"
-    GRANULE_DATE = "2022-07-21T01-49-09ZN"
-    GRANULE_SECTION = "_lon_-1.01_-158.81" # void if complete file
-    VERSION_2D_McDA = "V1.5.0"
+    GRANULE_DATE = "2010-01-18T00-19-57ZN"
+    GRANULE_SECTION = "_lon_170.72_27.91" # void if complete file
+    VERSION_2D_McDA = "V2.3.0-3-gd9c7c05"
     TYPE_2D_McDA = "Prototype"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the 2D-McDA file) or 'longitude'
-    SLICE_START = -6.01 # profindex or longitude
-    SLICE_END = -118.07 # profindex or longitude
+    SLICE_START = 170.59 # profindex or longitude
+    SLICE_END = 27.95 # profindex or longitude
     EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
     MAX_DETECT_LEVEL = 5
-    PLOT_ALL_STEPS = False
     INVERT_XAXIS = False
     YMIN = 8.4
     YMAX = 30
@@ -299,6 +494,8 @@ if __name__ == '__main__':
     FIGURES_FILETYPE = 'png' #'png' 'svg'
     FLAG_GRANULE = True # Write granule name in the plots
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
+    PLOT_TEMPERATURE_CONTOURS_OVER_COMPOSITION = False
+    PLOT_TROPOPAUSE = True
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     
     
@@ -348,12 +545,28 @@ if __name__ == '__main__':
         "Profile_ID",
         "Profile_Time",
         "Altitude",
+        "Temperature",
+        "Tropopause_Altitude_MERRA2",
         "Parallel_Detection_Flags_532",
         "Perpendicular_Detection_Flags_532",
         "Detection_Flags_1064",
         "Parallel_Attenuated_Backscatter_532",
         "Perpendicular_Attenuated_Backscatter_532",
-        "Attenuated_Backscatter_1064"]
+        "Attenuated_Backscatter_1064",
+        "Particulate_Parallel_Attenuated_Backscatter_532",
+        "Particulate_Perpendicular_Attenuated_Backscatter_532",
+        "Particulate_Attenuated_Backscatter_1064",
+        "NAT_Ice_Scattering_Ratio_Threshold"]
+    if True:
+        cal_2d_mcda_keys += [
+            "Homogeneous_Chunks_Mean_Parallel_Attenuated_Backscatter_532",
+            "Homogeneous_Chunks_Mean_Perpendicular_Attenuated_Backscatter_532",
+            "Homogeneous_Chunks_Mean_Particulate_Perpendicular_Attenuated_Backscatter_532",
+            "Homogeneous_Chunks_Mean_Attenuated_Backscatter_1064",
+            "Homogeneous_Chunks_Mean_Attenuated_Scattering_Ratio_532",
+            "Homogeneous_Chunks_Mean_NAT_Ice_Scattering_Ratio_Threshold",
+            "Homogeneous_Chunks_Mean_Temperature",
+            "Homogeneous_Chunks_Classification"]
     for key in cal_2d_mcda_keys:
         if key not in ds_2d_mcda:
             raise KeyError(f"Variable '{key}' not found in file")
@@ -407,7 +620,6 @@ if __name__ == '__main__':
     plot_fig.set_coordinates(data_dict_cal_2d_mcda["Latitude"], data_dict_cal_2d_mcda["Longitude"],
                              data_dict_cal_2d_mcda["Altitude"])
     
-
     # Plot signals
     if True:
         filename = f"2D-McDA-PSC{VERSION_2D_McDA}_AB532par"
@@ -422,13 +634,58 @@ if __name__ == '__main__':
         title = r"$\mathbf{1064\ nm\ Attenuated\ Backscatter}\ \beta^{\prime}_{1064}$"
         plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Attenuated_Backscatter_1064"], title, filename)
 
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_AB532par_part"
+        title = r"$\mathbf{532\ nm\ Particulate\ Parallel\ Attenuated\ Backscatter}\ \beta^{\prime}_{532,\parallel}$"
+        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Particulate_Parallel_Attenuated_Backscatter_532"], title, filename)
+
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_AB532per_part"
+        title = r"$\mathbf{532\ nm\ Particulate\ Perpendicular\ Attenuated\ Backscatter}\ \beta^{\prime}_{532,\perp}$"
+        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Particulate_Perpendicular_Attenuated_Backscatter_532"], title, filename)
+
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_AB1064_part"
+        title = r"$\mathbf{1064\ nm\ Particulate\ Attenuated\ Backscatter}\ \beta^{\prime}_{1064}$"
+        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Particulate_Attenuated_Backscatter_1064"], title, filename)
+        
+    # Plot averaged signals on homogeneous chunks
+    if True:
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_AB532par"
+        title = r"$\mathbf{Mean\ 532\ nm\ Parallel\ Attenuated\ Backscatter}\ \beta^{\prime}_{532,\parallel}$"
+        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Parallel_Attenuated_Backscatter_532"], title, filename)
+
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_AB532per"
+        title = r"$\mathbf{Mean\ 532\ nm\ Perpendicular\ Attenuated\ Backscatter}\ \beta^{\prime}_{532,\perp}$"
+        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Perpendicular_Attenuated_Backscatter_532"], title, filename)
+
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_AB532per_part"
+        title = r"$\mathbf{Mean\ 532\ nm\ Particulate\ Perpendicular\ Attenuated\ Backscatter}\ \beta^{\prime}_{p,532,\perp}$"
+        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Particulate_Perpendicular_Attenuated_Backscatter_532"], title, filename)
+
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_AB1064"
+        title = r"$\mathbf{Mean\ 1064\ nm\ Attenuated\ Backscatter}\ \beta^{\prime}_{1064}$"
+        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Attenuated_Backscatter_1064"], title, filename)
+
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_R532"
+        title = r"$\mathbf{Mean\ 532\ nm\ Attenuated\ Scattering\ Ratio}\ R^{\prime}_{532}$"
+        plot_fig.plot_sr_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Attenuated_Scattering_Ratio_532"], title, filename)
+
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_R532_nat_ice_threshold"
+        title = r"$\mathbf{532\ nm\ Attenuated\ Scattering\ Ratio NAT/ice\ threshold}\ R^{\prime}_{532}$"
+        plot_fig.plot_sr_signal(data_dict_cal_2d_mcda["NAT_Ice_Scattering_Ratio_Threshold"], title, filename)
+
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_R532_nat_ice_threshold"
+        title = r"$\mathbf{Mean\ 532\ nm\ Attenuated\ Scattering\ Ratio NAT/ice\ threshold}\ R^{\prime}_{532}$"
+        plot_fig.plot_sr_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_NAT_Ice_Scattering_Ratio_Threshold"], title, filename)
+
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_temperature"
+        title = r"$\mathbf{Mean\ Temperature}$"
+        plot_fig.plot_temperature(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Temperature"], title, filename)
+
 
     # Plot the 3 channel masks
     if True:
         plot_fig.plot_mask(None, data_dict_cal_2d_mcda["Parallel_Detection_Flags_532"], '532_par')
         plot_fig.plot_mask(None, data_dict_cal_2d_mcda["Perpendicular_Detection_Flags_532"], '532_per')
         plot_fig.plot_mask(None, data_dict_cal_2d_mcda["Detection_Flags_1064"], '1064')
-
 
     # Plot the composite masks
     if True:
@@ -454,5 +711,11 @@ if __name__ == '__main__':
 
         plot_fig.plot_composite_mask_channel(composite_mask_channel)
     
+    # Plot classification mask
+    if True:
+        plot_fig.plot_psc_composition(data_dict_cal_2d_mcda["Homogeneous_Chunks_Classification"], 
+                                      data_dict_cal_2d_mcda["Temperature"],
+                                      PLOT_TEMPERATURE_CONTOURS_OVER_COMPOSITION,
+                                      PLOT_TROPOPAUSE)
 
     print_time(tic_main_program)
