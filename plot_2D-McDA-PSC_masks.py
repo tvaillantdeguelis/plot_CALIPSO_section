@@ -480,7 +480,7 @@ if __name__ == '__main__':
     INDATA_FOLDER = "/home/vaillant/codes/projects/2D_McDA_PSC/out/data/"
     GRANULE_DATE = "2010-01-18T00-19-57ZN"
     GRANULE_SECTION = "_lon_170.72_27.91" # void if complete file
-    VERSION_2D_McDA = "V2.3.0-3-gd9c7c05"
+    VERSION_2D_McDA = "V2.4.2"
     TYPE_2D_McDA = "Prototype"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the 2D-McDA file) or 'longitude'
     SLICE_START = 170.59 # profindex or longitude
@@ -552,21 +552,22 @@ if __name__ == '__main__':
         "Detection_Flags_1064",
         "Parallel_Attenuated_Backscatter_532",
         "Perpendicular_Attenuated_Backscatter_532",
-        "Attenuated_Backscatter_1064",
+        "Total_Attenuated_Backscatter_1064",
         "Particulate_Parallel_Attenuated_Backscatter_532",
         "Particulate_Perpendicular_Attenuated_Backscatter_532",
-        "Particulate_Attenuated_Backscatter_1064",
-        "NAT_Ice_Scattering_Ratio_Threshold"]
+        "Particulate_Total_Attenuated_Backscatter_1064",
+        "PSC_Ice_Mixture_Boundary"]
     if True:
         cal_2d_mcda_keys += [
-            "Homogeneous_Chunks_Mean_Parallel_Attenuated_Backscatter_532",
-            "Homogeneous_Chunks_Mean_Perpendicular_Attenuated_Backscatter_532",
             "Homogeneous_Chunks_Mean_Particulate_Perpendicular_Attenuated_Backscatter_532",
-            "Homogeneous_Chunks_Mean_Attenuated_Backscatter_1064",
-            "Homogeneous_Chunks_Mean_Attenuated_Scattering_Ratio_532",
-            "Homogeneous_Chunks_Mean_NAT_Ice_Scattering_Ratio_Threshold",
+            "Homogeneous_Chunks_Mean_Total_Attenuated_Scattering_Ratio_532",
+            "Homogeneous_Chunks_Mean_PSC_Ice_Mixture_Boundary",
             "Homogeneous_Chunks_Mean_Temperature",
-            "Homogeneous_Chunks_Classification"]
+            "PSC_Composition"]
+        # cal_2d_mcda_keys += [
+        #     "Homogeneous_Chunks_Mean_Parallel_Attenuated_Backscatter_532",
+        #     "Homogeneous_Chunks_Mean_Perpendicular_Attenuated_Backscatter_532",
+        #     "Homogeneous_Chunks_Mean_Total_Attenuated_Backscatter_1064"]
     for key in cal_2d_mcda_keys:
         if key not in ds_2d_mcda:
             raise KeyError(f"Variable '{key}' not found in file")
@@ -632,7 +633,7 @@ if __name__ == '__main__':
 
         filename = f"2D-McDA-PSC{VERSION_2D_McDA}_AB1064"
         title = r"$\mathbf{1064\ nm\ Attenuated\ Backscatter}\ \beta^{\prime}_{1064}$"
-        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Attenuated_Backscatter_1064"], title, filename)
+        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Total_Attenuated_Backscatter_1064"], title, filename)
 
         filename = f"2D-McDA-PSC{VERSION_2D_McDA}_AB532par_part"
         title = r"$\mathbf{532\ nm\ Particulate\ Parallel\ Attenuated\ Backscatter}\ \beta^{\prime}_{532,\parallel}$"
@@ -644,10 +645,10 @@ if __name__ == '__main__':
 
         filename = f"2D-McDA-PSC{VERSION_2D_McDA}_AB1064_part"
         title = r"$\mathbf{1064\ nm\ Particulate\ Attenuated\ Backscatter}\ \beta^{\prime}_{1064}$"
-        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Particulate_Attenuated_Backscatter_1064"], title, filename)
+        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Particulate_Total_Attenuated_Backscatter_1064"], title, filename)
         
     # Plot averaged signals on homogeneous chunks
-    if True:
+    if False:
         filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_AB532par"
         title = r"$\mathbf{Mean\ 532\ nm\ Parallel\ Attenuated\ Backscatter}\ \beta^{\prime}_{532,\parallel}$"
         plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Parallel_Attenuated_Backscatter_532"], title, filename)
@@ -656,25 +657,26 @@ if __name__ == '__main__':
         title = r"$\mathbf{Mean\ 532\ nm\ Perpendicular\ Attenuated\ Backscatter}\ \beta^{\prime}_{532,\perp}$"
         plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Perpendicular_Attenuated_Backscatter_532"], title, filename)
 
+        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_AB1064"
+        title = r"$\mathbf{Mean\ 1064\ nm\ Attenuated\ Backscatter}\ \beta^{\prime}_{1064}$"
+        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Total_Attenuated_Backscatter_1064"], title, filename)
+
+    if True:
         filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_AB532per_part"
         title = r"$\mathbf{Mean\ 532\ nm\ Particulate\ Perpendicular\ Attenuated\ Backscatter}\ \beta^{\prime}_{p,532,\perp}$"
         plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Particulate_Perpendicular_Attenuated_Backscatter_532"], title, filename)
 
-        filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_AB1064"
-        title = r"$\mathbf{Mean\ 1064\ nm\ Attenuated\ Backscatter}\ \beta^{\prime}_{1064}$"
-        plot_fig.plot_ab_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Attenuated_Backscatter_1064"], title, filename)
-
         filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_R532"
         title = r"$\mathbf{Mean\ 532\ nm\ Attenuated\ Scattering\ Ratio}\ R^{\prime}_{532}$"
-        plot_fig.plot_sr_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Attenuated_Scattering_Ratio_532"], title, filename)
+        plot_fig.plot_sr_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_Total_Attenuated_Scattering_Ratio_532"], title, filename)
 
         filename = f"2D-McDA-PSC{VERSION_2D_McDA}_R532_nat_ice_threshold"
         title = r"$\mathbf{532\ nm\ Attenuated\ Scattering\ Ratio NAT/ice\ threshold}\ R^{\prime}_{532}$"
-        plot_fig.plot_sr_signal(data_dict_cal_2d_mcda["NAT_Ice_Scattering_Ratio_Threshold"], title, filename)
+        plot_fig.plot_sr_signal(data_dict_cal_2d_mcda["PSC_Ice_Mixture_Boundary"], title, filename)
 
         filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_R532_nat_ice_threshold"
         title = r"$\mathbf{Mean\ 532\ nm\ Attenuated\ Scattering\ Ratio NAT/ice\ threshold}\ R^{\prime}_{532}$"
-        plot_fig.plot_sr_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_NAT_Ice_Scattering_Ratio_Threshold"], title, filename)
+        plot_fig.plot_sr_signal(data_dict_cal_2d_mcda["Homogeneous_Chunks_Mean_PSC_Ice_Mixture_Boundary"], title, filename)
 
         filename = f"2D-McDA-PSC{VERSION_2D_McDA}_chunks_mean_temperature"
         title = r"$\mathbf{Mean\ Temperature}$"
@@ -713,7 +715,7 @@ if __name__ == '__main__':
     
     # Plot classification mask
     if True:
-        plot_fig.plot_psc_composition(data_dict_cal_2d_mcda["Homogeneous_Chunks_Classification"], 
+        plot_fig.plot_psc_composition(data_dict_cal_2d_mcda["PSC_Composition"], 
                                       data_dict_cal_2d_mcda["Temperature"],
                                       PLOT_TEMPERATURE_CONTOURS_OVER_COMPOSITION,
                                       PLOT_TROPOPAUSE)
