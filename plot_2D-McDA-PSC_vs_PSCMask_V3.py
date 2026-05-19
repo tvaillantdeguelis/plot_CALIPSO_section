@@ -274,7 +274,9 @@ class FigureMaker(CALIOPFigureMaker):
         #    3 -> 3
         #    1 -> 4
         # etc.
-        mask_plot = np.vectorize(mapping.get)(mask)
+        mask_plot = np.full(mask.shape, -1, dtype=np.int32)
+        for value, idx in mapping.items():
+            mask_plot[mask == value] = idx
 
         # Create colormap
         my_cmap = mpl.colors.ListedColormap(palette)
@@ -288,8 +290,6 @@ class FigureMaker(CALIOPFigureMaker):
         # Plot figure
         pc = ax0.pcolormesh(self.pindexbins, self.altbins, mask_plot.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=FLAG_GRANULE)
-        ax0.set_title(title, weight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
         
         if plot_temp:
             APPLY_SMOOTH = False
@@ -312,6 +312,9 @@ class FigureMaker(CALIOPFigureMaker):
             ax0.text(x_centers[i_mid], tropopause_alt[i_mid] + 1.0,
                      "Tropopause", color="white", fontsize=10, ha="center", va="bottom", zorder=11, weight="bold")
 
+        ax0.set_title(title, weight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=FLAG_GRANULE)
+
         # Plot colorbar
         cbar = plt.colorbar(pc, cax=cax, orientation='vertical', drawedges=True)
         fontsize_clabel = 5
@@ -321,50 +324,6 @@ class FigureMaker(CALIOPFigureMaker):
                          va='center', fontsize=fontsize_clabel, transform=cbar.ax.transAxes)
         
 
-    def plot_psc_composition_v3(self, ax0, cax, mask):
-
-        # Remove edges
-        if self.edges_removal != 0: # to avoid error with "-0"
-            mask = remove_edges(mask, self.edges_removal)
-
-        # Labels
-        clabels = ["Likely tropo. ice", # -4
-                  "Not determinable", # -1
-                  "No detection", # 0
-                  "STS", # 1
-                  "NAT", # 2
-                  "Ice", # 4
-                  "Enhanced NAT", # 5
-                  "Wave ice"] # 6
-
-        # Colormap
-        palette = ["#000000",
-                   "#FFFFFF",
-                   "#444444",
-                   "#00FA9A",
-                   "#FFFF00",
-                   "#00BBFF",
-                   "#FF0000",
-                   "#4700C3"]
-        colorbins = np.array((-5, -3, -0.5, 0.5, 1.5, 3.5, 4.5, 5.5, 6.5))
-        my_cmap = mpl.colors.ListedColormap(palette)
-        my_norm = mpl.colors.BoundaryNorm(colorbins, my_cmap.N)
-    
-        # Plot figure
-        pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
-                            norm=my_norm, rasterized=True)
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=False)
-        plt.title(f'PSC Mask Composition {VERSION_CAL_LID_L2_PSCMask}', weight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
-
-        # Plot colorbar
-        cbar = plt.colorbar(pc, cax=cax, orientation='vertical', drawedges=True)
-        fontsize_clabel = 5
-        cbar.ax.tick_params(axis='y', which='both', right=False, labelright=False)
-        for j, lab in enumerate(clabels):
-            cbar.ax.text(1.5, 1/(float(colorbins.size-1)*2) + j/float(colorbins.size-1), lab,
-                         va='center', fontsize=fontsize_clabel, transform=cbar.ax.transAxes)
-
-
 if __name__ == '__main__':
     tic_main_program = print_time()
 
@@ -373,14 +332,14 @@ if __name__ == '__main__':
     INDATA_FOLDER = "/home/vaillant/codes/projects/2D_McDA_PSC/out/data/"
     INDATA_FOLDER_PSCMask = "/DATA/LIENS/CALIOP/"
     GRANULE_DATE = "2010-01-18T00-19-57ZN"
-    GRANULE_SECTION = "_lon_170.72_27.91" # void if complete file
-    VERSION_2D_McDA = "V2.4.2"
+    GRANULE_SECTION = "" # void if complete file
+    VERSION_2D_McDA = "V2.5.0"
     TYPE_2D_McDA = "Prototype"
     VERSION_CAL_LID_L2_PSCMask = "V3.00"
     TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
-    SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the 2D-McDA file) or 'longitude'
-    SLICE_START = 170.59 # profindex or longitude
-    SLICE_END = 27.95 # profindex or longitude
+    SLICE_START_END_TYPE = 'profindex' # 'longitude' # 'profindex' (of the 2D-McDA file) or 'longitude'
+    SLICE_START = None # 170.59 # profindex or longitude
+    SLICE_END = None # 27.95 # profindex or longitude
     EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
     MAX_DETECT_LEVEL = 5
     INVERT_XAXIS = False
@@ -388,7 +347,7 @@ if __name__ == '__main__':
     YMAX = 30
     FIGURES_FILETYPE = 'png' #'png' 'svg'
     FLAG_GRANULE = False # Write granule name in the subplots
-    FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
+    FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/2D-McDA-PSC_vs_PSCMask_V3/"
     PLOT_TEMPERATURE_CONTOURS_OVER_COMPOSITION = False
     PLOT_TROPOPAUSE = True
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -544,8 +503,6 @@ if __name__ == '__main__':
     profile_utc_time = cal_psc.get_data("Profile_UTC_Time")
     granule_start_index = (np.abs(profile_utc_time - granule_start_time)).argmin()
     granule_end_index = (np.abs(profile_utc_time - granule_end_time)).argmin()
-    print('granule_start_index:', granule_start_index)
-    print('granule_end_index:', granule_end_index)
     
     # Get prof_min and prof_max from longitudes
     lat_granule = cal_psc.get_data("Latitude")[granule_start_index:granule_end_index+1]
@@ -557,12 +514,17 @@ if __name__ == '__main__':
     else:
         prof_min = SLICE_START
         prof_max = SLICE_END
-        
+
+    if prof_min is None:
+        prof_min = 0
+    if prof_max is None:
+        prof_max = len(lat_granule) - 1
+
     # Print lat/lon of min and max prof indices
     print(f"\tFrom min profile index {prof_min:d} "
-          f"(lat = {lat_granule[prof_min_granule]:.2f} / lon = {lon_granule[prof_min_granule]:.2f}) "
+          f"(lat = {lat_granule[prof_min]:.2f} / lon = {lon_granule[prof_min]:.2f}) "
           f"to max profile index {prof_max:d} "
-          f"(lat = {lat_granule[prof_max_granule]:.2f} / lon = {lon_granule[prof_max_granule]:.2f})")
+          f"(lat = {lat_granule[prof_max]:.2f} / lon = {lon_granule[prof_max]:.2f})")
     
     # Load parameters
     data_dict_cal_psc = {}
@@ -584,28 +546,6 @@ if __name__ == '__main__':
     lon = data_dict_cal_psc["Longitude"]
     alt = data_dict_cal_psc["Altitude"]
 
-    # # ************
-    # # *** Plot ***
-    # print("\n\n*****Plot...*****")
-    
-    # # Initialize instance of FigureMaker
-    # plot_fig = FigureMaker()
-    # plot_fig.fig_w = cm2in(16) # cm
-    # plot_fig.fig_h = cm2in(8) # cm
-    # plot_fig.adj_left = 0.08
-    # plot_fig.adj_bottom = 0.11
-    # plot_fig.adj_right = 0.87
-    # plot_fig.adj_top = 0.81
-    # plot_fig.axes_title_pad = 1.14
-    # plot_fig.axes_titlesize = 8
-    # plot_fig.set_and_create_fig_folder(FIGURES_PATH, GRANULE_DATE, lon[0], lon[-1])
-    # plot_fig.set_head_filename(GRANULE_DATE, lon[0], lon[-1])
-    # plot_fig.set_edges_removal(EDGES_REMOVAL)
-    # plot_fig.set_coordinates(lat, lon, alt)
-    
-    # # Plot PSC mask composition
-    # plot_fig.plot_psc_composition(data_dict_cal_psc["PSC_Composition"])
-
 
     # ************
     # *** Plot ***
@@ -614,7 +554,6 @@ if __name__ == '__main__':
     # Initialize instance of FigureMaker
     plot_fig = FigureMaker()
     plot_fig.filetype = FIGURES_FILETYPE
-    plot_fig.set_and_create_fig_folder(FIGURES_PATH, GRANULE_DATE, lon_granule[prof_min], lon_granule[prof_max])
     plot_fig.set_head_filename(GRANULE_DATE, lon_granule[prof_min], lon_granule[prof_max])
     plot_fig.set_edges_removal(EDGES_REMOVAL)
     plot_fig.set_max_detect_level(MAX_DETECT_LEVEL)
@@ -728,18 +667,11 @@ if __name__ == '__main__':
         PLOT_TROPOPAUSE,
     )
 
-    # # PSC composition V3
-    # ax, cax = create_ax_cax(fig, gs[3, 2])
-    # plot_fig.plot_psc_composition_v3(
-    #     ax, cax,
-    #     data_dict_cal_psc["PSC_Composition"]
-    # )
-
     # PSC composition V3
     ax, cax = create_ax_cax(fig, gs[3, 2])
     plot_fig.plot_psc_composition(
         ax, cax,
-        data_dict_cal_2d_mcda["PSC_Composition"],
+        data_dict_cal_psc["PSC_Composition"],
         data_dict_cal_2d_mcda["Temperature"],
         f'PSC Mask {VERSION_CAL_LID_L2_PSCMask} PSC composition',
         PLOT_TEMPERATURE_CONTOURS_OVER_COMPOSITION,
@@ -752,9 +684,8 @@ if __name__ == '__main__':
                  y=0.99)
 
     plt.subplots_adjust(left=0.02, bottom=0.03, right=0.95, top=0.92)
-    fig_folder = os.path.join(FIGURES_PATH, f"{GRANULE_DATE}_lon_{lon_granule[prof_min]:.2f}_{lon_granule[prof_max]:.2f}")
     filename = f"{GRANULE_DATE}_lon_{lon_granule[prof_min]:.2f}_{lon_granule[prof_max]:.2f}_2D-McDA-PSC-{VERSION_2D_McDA}_vs_PSCMask-V3.png"
-    plt.savefig(os.path.join(fig_folder, filename), format="png", dpi=300, transparent=False)
+    plt.savefig(os.path.join(FIGURES_PATH, filename), format="png", dpi=300, transparent=False)
     print("\t%s saved" % filename)
 
     # Close figure
