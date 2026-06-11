@@ -479,8 +479,8 @@ if __name__ == '__main__':
     # PARAMETERS
     INDATA_FOLDER = "/home/vaillant/codes/projects/2D_McDA_PSC/out/data/"
     GRANULE_DATE = "2010-01-18T00-19-57ZN"
-    GRANULE_SECTION = "_lon_170.72_27.91" # void if complete file
-    VERSION_2D_McDA = "V2.4.2"
+    GRANULE_SECTION = "" # void if complete file
+    VERSION_2D_McDA = "V2.6.0"
     TYPE_2D_McDA = "Prototype"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the 2D-McDA file) or 'longitude'
     SLICE_START = 170.59 # profindex or longitude

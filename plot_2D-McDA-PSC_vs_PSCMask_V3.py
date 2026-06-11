@@ -308,9 +308,10 @@ class FigureMaker(CALIOPFigureMaker):
             x_centers = 0.5 * (self.pindexbins[:-1] + self.pindexbins[1:])
             tropopause_alt = data_dict_cal_2d_mcda["Tropopause_Altitude_MERRA2"] 
             ax0.plot(x_centers, tropopause_alt, c="w", lw=1.5, ls="-", zorder=10, label="Tropopause")
-            i_mid = len(x_centers) // 2
-            ax0.text(x_centers[i_mid], tropopause_alt[i_mid] + 1.0,
-                     "Tropopause", color="white", fontsize=10, ha="center", va="bottom", zorder=11, weight="bold")
+            if False:
+                i_mid = len(x_centers) // 2
+                ax0.text(x_centers[i_mid], tropopause_alt[i_mid] + 1.0,
+                        "Tropopause", color="white", fontsize=10, ha="center", va="bottom", zorder=11, weight="bold")
 
         ax0.set_title(title, weight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, flag_granule=FLAG_GRANULE)
@@ -329,11 +330,15 @@ if __name__ == '__main__':
 
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
+    if len(sys.argv) > 1:
+        GRANULE_DATE = sys.argv[1]
+        VERSION_2D_McDA = sys.argv[2]
+    else:
+        GRANULE_DATE = "2010-01-18T00-19-57ZN"
+        VERSION_2D_McDA = "V2.7.2"
     INDATA_FOLDER = "/home/vaillant/codes/projects/2D_McDA_PSC/out/data/"
     INDATA_FOLDER_PSCMask = "/DATA/LIENS/CALIOP/"
-    GRANULE_DATE = "2010-01-18T00-19-57ZN"
     GRANULE_SECTION = "" # void if complete file
-    VERSION_2D_McDA = "V2.5.0"
     TYPE_2D_McDA = "Prototype"
     VERSION_CAL_LID_L2_PSCMask = "V3.00"
     TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
@@ -347,7 +352,7 @@ if __name__ == '__main__':
     YMAX = 30
     FIGURES_FILETYPE = 'png' #'png' 'svg'
     FLAG_GRANULE = False # Write granule name in the subplots
-    FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/2D-McDA-PSC_vs_PSCMask_V3/"
+    FIGURES_PATH = f"/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/2D-McDA-PSC_{VERSION_2D_McDA}_vs_PSCMask_V3/"
     PLOT_TEMPERATURE_CONTOURS_OVER_COMPOSITION = False
     PLOT_TROPOPAUSE = True
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
@@ -391,6 +396,9 @@ if __name__ == '__main__':
           f"to max profile index {prof_max:d} "
           f"(lat = {lat_granule[prof_max]:.2f} / lon = {lon_granule[prof_max]:.2f})")
     
+    lon_granule_2d_mcda_psc_min = lon_granule[prof_min]
+    lon_granule_2d_mcda_psc_max = lon_granule[prof_max]
+
     # Load 2D-McDA parameters
     data_dict_cal_2d_mcda = {}
     cal_2d_mcda_keys = [
@@ -503,28 +511,22 @@ if __name__ == '__main__':
     profile_utc_time = cal_psc.get_data("Profile_UTC_Time")
     granule_start_index = (np.abs(profile_utc_time - granule_start_time)).argmin()
     granule_end_index = (np.abs(profile_utc_time - granule_end_time)).argmin()
+    print('granule_start_index:', granule_start_index)
+    print('granule_end_index:', granule_end_index)
     
-    # Get prof_min and prof_max from longitudes
-    lat_granule = cal_psc.get_data("Latitude")[granule_start_index:granule_end_index+1]
-    lon_granule = cal_psc.get_data("Longitude")[granule_start_index:granule_end_index+1]
-    if SLICE_START_END_TYPE == 'longitude':
-        prof_min_granule, prof_max_granule = get_prof_min_max_indexes_from_lon(lon_granule, SLICE_START, SLICE_END) 
-        prof_min = prof_min_granule + granule_start_index
-        prof_max = prof_max_granule + granule_start_index
-    else:
-        prof_min = SLICE_START
-        prof_max = SLICE_END
 
-    if prof_min is None:
-        prof_min = 0
-    if prof_max is None:
-        prof_max = len(lat_granule) - 1
+    # Get prof_min and prof_max from longitudes
+    lat_granule_v3 = cal_psc.get_data("Latitude")[granule_start_index:granule_end_index+1]
+    lon_granule_v3 = cal_psc.get_data("Longitude")[granule_start_index:granule_end_index+1]
+    prof_min_granule, prof_max_granule = get_prof_min_max_indexes_from_lon(lon_granule_v3, lon_granule_2d_mcda_psc_min, lon_granule_2d_mcda_psc_max) 
+    prof_min_v3 = prof_min_granule + granule_start_index
+    prof_max_v3 = prof_max_granule + granule_start_index
 
     # Print lat/lon of min and max prof indices
-    print(f"\tFrom min profile index {prof_min:d} "
-          f"(lat = {lat_granule[prof_min]:.2f} / lon = {lon_granule[prof_min]:.2f}) "
-          f"to max profile index {prof_max:d} "
-          f"(lat = {lat_granule[prof_max]:.2f} / lon = {lon_granule[prof_max]:.2f})")
+    print(f"\tFrom min profile index {prof_min_v3:d} "
+          f"(lat = {lat_granule_v3[prof_min_granule]:.2f} / lon = {lon_granule_v3[prof_min_granule]:.2f}) "
+          f"to max profile index {prof_max_v3:d} "
+          f"(lat = {lat_granule_v3[prof_max_granule]:.2f} / lon = {lon_granule_v3[prof_max_granule]:.2f})")
     
     # Load parameters
     data_dict_cal_psc = {}
@@ -540,7 +542,7 @@ if __name__ == '__main__':
         "Perpendicular_Attenuated_Backscatter_532"
     ]
     for key in cal_psc_keys:
-        data_dict_cal_psc[key] = cal_psc.get_data(key, prof_min, prof_max, 'profindex')
+        data_dict_cal_psc[key] = cal_psc.get_data(key, prof_min_v3, prof_max_v3, 'profindex')
     
     lat = data_dict_cal_psc["Latitude"] 
     lon = data_dict_cal_psc["Longitude"]
@@ -667,6 +669,9 @@ if __name__ == '__main__':
         PLOT_TROPOPAUSE,
     )
 
+    plot_fig.set_coordinates(data_dict_cal_psc["Latitude"], data_dict_cal_psc["Longitude"],
+                             data_dict_cal_psc["Altitude"])
+    
     # PSC composition V3
     ax, cax = create_ax_cax(fig, gs[3, 2])
     plot_fig.plot_psc_composition(
@@ -675,7 +680,7 @@ if __name__ == '__main__':
         data_dict_cal_2d_mcda["Temperature"],
         f'PSC Mask {VERSION_CAL_LID_L2_PSCMask} PSC composition',
         PLOT_TEMPERATURE_CONTOURS_OVER_COMPOSITION,
-        PLOT_TROPOPAUSE
+        False
     )
 
     plt.suptitle(f"{GRANULE_DATE}_lon_{lon_granule[prof_min]:.2f}_{lon_granule[prof_max]:.2f}", 
@@ -685,6 +690,7 @@ if __name__ == '__main__':
 
     plt.subplots_adjust(left=0.02, bottom=0.03, right=0.95, top=0.92)
     filename = f"{GRANULE_DATE}_lon_{lon_granule[prof_min]:.2f}_{lon_granule[prof_max]:.2f}_2D-McDA-PSC-{VERSION_2D_McDA}_vs_PSCMask-V3.png"
+    os.makedirs(FIGURES_PATH, exist_ok=True)
     plt.savefig(os.path.join(FIGURES_PATH, filename), format="png", dpi=300, transparent=False)
     print("\t%s saved" % filename)
 
