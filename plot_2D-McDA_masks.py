@@ -6,6 +6,7 @@ import os
 
 from datetime import datetime
 import numpy as np
+from netCDF4 import Dataset
 from pyhdf.SD import SD
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -450,14 +451,15 @@ if __name__ == '__main__':
 
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
-    INDATA_FOLDER = "/home/vaillant/codes/projects/2D-McDA/data/output/"
+    INDATA_FOLDER = "/home/ticjo/Documents/Pro/Recherche/codes/projects/2D-McDA/data/output/2D_McDA.v2.0.0/2018/2018_08_31/"
     GRANULE_DATE = "2018-08-31T21-33-53ZN"
-    GRANULE_SECTION = "_lon_63.20_61.30" # void if complete file
-    VERSION_2D_McDA = "V1.1.7"
+    GRANULE_SECTION = "" # void if complete file
+    VERSION_2D_McDA = "V2.0.0"
     TYPE_2D_McDA = "Dev"
+    INPUT_FILE_FORMAT = "netCDF" # "netCDF" or "HDF"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-    SLICE_START = 63.2 # profindex or longitude
-    SLICE_END = 61.3 # profindex or longitude
+    SLICE_START = 63.28 # profindex or longitude
+    SLICE_END = 61.23 # profindex or longitude
     EDGES_REMOVAL = 0 # number of 1/3-km prof to remove on both edges of plot
     MAX_DETECT_LEVEL = 5
     PLOT_ALL_STEPS = False
@@ -465,31 +467,45 @@ if __name__ == '__main__':
     YMIN = -0.5 # None
     YMAX = 20
     BROWSE_IMAGE_ASPECT_RATIO = True
-    FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
+    FIGURES_PATH = "/home/ticjo/Documents/Pro/Recherche/codes/projects/plot_CALIPSO_section/out/figures/"
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     
     
-    # **********************************
-    # *** Load 2D-McDA HDF data file ***
-    print("\n*****Load 2D-McDA HDF data file...*****")
+    # *******************************
+    # *** Load 2D-McDA data file ***
+    input_file_format = INPUT_FILE_FORMAT.lower()
+    if input_file_format not in ("netcdf", "hdf"):
+        raise ValueError("INPUT_FILE_FORMAT must be either 'netCDF' or 'HDF'")
+
+    print(f"\n*****Load 2D-McDA {INPUT_FILE_FORMAT} data file...*****")
     
     # Get filename and filepath
+    file_extension = "nc" if input_file_format == "netcdf" else "hdf"
     filename_2d_mcda = f"CAL_LID_L2_2D_McDA-{TYPE_2D_McDA}-{VERSION_2D_McDA.replace('.', '-')}." \
-                       f"{GRANULE_DATE}{GRANULE_SECTION}.hdf"
+                       f"{GRANULE_DATE}{GRANULE_SECTION}.{file_extension}"
     granule_date_dict = split_granule_date(GRANULE_DATE)
-    hdffile = os.path.join(INDATA_FOLDER, f"2D_McDA.{VERSION_2D_McDA.replace('V', 'v')}",
-                           str(granule_date_dict['year']),
-                           f"{granule_date_dict['year']}_{granule_date_dict['month']:02d}_"
-                           f"{granule_date_dict['day']:02d}",
-                           filename_2d_mcda)
+    datafile = os.path.join(INDATA_FOLDER, f"2D_McDA.{VERSION_2D_McDA.replace('V', 'v')}",
+                            str(granule_date_dict['year']),
+                            f"{granule_date_dict['year']}_{granule_date_dict['month']:02d}_"
+                            f"{granule_date_dict['day']:02d}",
+                            filename_2d_mcda)
+    # Also allow INDATA_FOLDER to point directly to the granule directory.
+    direct_datafile = os.path.join(INDATA_FOLDER, filename_2d_mcda)
+    if os.path.isfile(direct_datafile):
+        datafile = direct_datafile
 
-    # Open HDF file
-    print(f"\tGranule path: {hdffile}")
-    cal_2d_mcda = CALIPSOReader(hdffile)
+    # Open the selected file format
+    print(f"\tGranule path: {datafile}")
+    if input_file_format == "hdf":
+        cal_2d_mcda = CALIPSOReader(datafile)
+        lat_granule = cal_2d_mcda.get_data("Latitude")
+        lon_granule = cal_2d_mcda.get_data("Longitude")
+    else:
+        cal_2d_mcda = Dataset(datafile, mode="r")
+        lat_granule = cal_2d_mcda.variables["Latitude"][:]
+        lon_granule = cal_2d_mcda.variables["Longitude"][:]
 
     # Get prof_min and prof_max from longitudes
-    lat_granule = cal_2d_mcda.get_data("Latitude")
-    lon_granule = cal_2d_mcda.get_data("Longitude")
     if SLICE_START_END_TYPE == 'longitude':
         prof_min, prof_max = get_prof_min_max_indexes_from_lon(lon_granule, SLICE_START, SLICE_END)
     else:
@@ -517,8 +533,19 @@ if __name__ == '__main__':
         "Composite_Detection_Flags"
     ]
     for key in cal_2d_mcda_keys:
-        data_dict_cal_2d_mcda[key] = cal_2d_mcda.get_data(key, SLICE_START, SLICE_END,
-                                                          SLICE_START_END_TYPE)
+        if input_file_format == "hdf":
+            data = cal_2d_mcda.get_data(key, SLICE_START, SLICE_END,
+                                        SLICE_START_END_TYPE)
+        else:
+            if key not in cal_2d_mcda.variables:
+                raise KeyError(f"Variable '{key}' not found in file '{datafile}'")
+            variable = cal_2d_mcda.variables[key]
+            variable_slice = [slice(None)] * variable.ndim
+            if "Profile_ID" in variable.dimensions:
+                profile_axis = variable.dimensions.index("Profile_ID")
+                variable_slice[profile_axis] = slice(prof_min, prof_max + 1)
+            data = variable[tuple(variable_slice)]
+        data_dict_cal_2d_mcda[key] = data
     
     data_dict_cal_2d_mcda_steps = {}
     if PLOT_ALL_STEPS:
@@ -534,8 +561,22 @@ if __name__ == '__main__':
             "CumulativeTwoWayTransmittance_1064"
         ]
         for key in cal_2d_mcda_steps_keys:
-            data_dict_cal_2d_mcda_steps[key] = cal_2d_mcda.get_data(key, SLICE_START, SLICE_END,
-                                                                    SLICE_START_END_TYPE)
+            if input_file_format == "hdf":
+                data = cal_2d_mcda.get_data(key, SLICE_START, SLICE_END,
+                                            SLICE_START_END_TYPE)
+            else:
+                if key not in cal_2d_mcda.variables:
+                    raise KeyError(f"Variable '{key}' not found in file '{datafile}'")
+                variable = cal_2d_mcda.variables[key]
+                variable_slice = [slice(None)] * variable.ndim
+                if "Profile_ID" in variable.dimensions:
+                    profile_axis = variable.dimensions.index("Profile_ID")
+                    variable_slice[profile_axis] = slice(prof_min, prof_max + 1)
+                data = variable[tuple(variable_slice)]
+            data_dict_cal_2d_mcda_steps[key] = data
+
+    if input_file_format == "netcdf":
+        cal_2d_mcda.close()
     
     # Weak/Strong feature mask
     mask_weak_strong = np.bitwise_and(data_dict_cal_2d_mcda["Composite_Detection_Flags"], 7).astype(float)
@@ -591,7 +632,7 @@ if __name__ == '__main__':
         plot_fig.plot_steps(data_dict_cal_2d_mcda_steps["Detection_Flags_1064_steps"],
                    data_dict_cal_2d_mcda_steps["Attenuated_Scattering_Ratio_1064_steps"],
                    '1064')
-    if PLOT_ALL_STEPS or True:
+    if PLOT_ALL_STEPS:
         plot_fig.plot_twoway_transmittance(data_dict_cal_2d_mcda_steps["Parallel_CumulativeTwoWayTransmittance_532"], '532_par')
         plot_fig.plot_twoway_transmittance(data_dict_cal_2d_mcda_steps["Perpendicular_CumulativeTwoWayTransmittance_532"], '532_per')
         plot_fig.plot_twoway_transmittance(data_dict_cal_2d_mcda_steps["CumulativeTwoWayTransmittance_1064"], '1064')
