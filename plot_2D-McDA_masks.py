@@ -17,6 +17,7 @@ import cmocean
 
 # Import my modules
 # sys.path.insert(0, '/home/vaillant/codes/projects/plot_CALIPSO_section/')
+sys.path.append("./my_modules/")
 from standard_outputs import print_time
 from readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon
 from paths import split_granule_date
@@ -449,20 +450,20 @@ if __name__ == '__main__':
 
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
-    INDATA_FOLDER = "/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/out/data/"
-    GRANULE_DATE = "2016-09-18T13-13-48ZD"
-    GRANULE_SECTION = "_lon_6.00_2.00" # void if complete file
-    VERSION_2D_McDA = "V1.0.4"
+    INDATA_FOLDER = "/home/vaillant/codes/projects/2D-McDA/data/output/"
+    GRANULE_DATE = "2018-08-31T21-33-53ZN"
+    GRANULE_SECTION = "_lon_63.20_61.30" # void if complete file
+    VERSION_2D_McDA = "V1.1.7"
     TYPE_2D_McDA = "Dev"
     SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-    SLICE_START = 5.08 # profindex or longitude
-    SLICE_END = 2.57 # profindex or longitude
+    SLICE_START = 63.2 # profindex or longitude
+    SLICE_END = 61.3 # profindex or longitude
     EDGES_REMOVAL = 0 # number of 1/3-km prof to remove on both edges of plot
     MAX_DETECT_LEVEL = 5
     PLOT_ALL_STEPS = False
     INVERT_XAXIS = False
-    YMIN = 0 # None
-    YMAX = 8
+    YMIN = -0.5 # None
+    YMAX = 20
     BROWSE_IMAGE_ASPECT_RATIO = True
     FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>

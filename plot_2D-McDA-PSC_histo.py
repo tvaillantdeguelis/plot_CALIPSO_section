@@ -16,7 +16,7 @@ import cmocean
 # CONFIGURATION
 # =========================
 RECOMPUTE_HISTO = True  # <-- True = recalcul, False = reload + plot
-VERSION = "2.7.2"
+VERSION = "2.7.4"
 ROOT_DIR = Path(f"/home/vaillant/codes/projects/2D_McDA_PSC/out/data/2D_McDA_PSC.v{VERSION}")
 START_DATE = "2009-05-01"
 END_DATE   = "2009-10-31"
