@@ -166,3 +166,8 @@ cython_debug/
 
 # VS Code
 *.code-workspace
+*.vscode/
+
+# Folders
+out/*
+test/*
