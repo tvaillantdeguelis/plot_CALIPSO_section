@@ -236,10 +236,12 @@ class FigureMaker(CALIOPFigureMaker):
         if CASE_STUDY_NAME:
             print(CASE_STUDY_NAME)
             title = f"{CASE_STUDY_NAME}\n{self.granule_date}\n{start_UTC_time} – {end_UTC_time}"
-            ypos = 0.9
+            ypos = 0.93
+            adjust_top = 0.87
         else:
             title = f"{self.granule_date}\n{start_UTC_time} – {end_UTC_time}"
             ypos = 0.95
+            adjust_top = 0.9
         ax.text(0.5, ypos, title, weight='bold', ha='center', va='center',fontsize=16, transform=fig.transFigure)
 
         # # Save figure (for test_colorbar)
@@ -249,7 +251,7 @@ class FigureMaker(CALIOPFigureMaker):
 
         # Save figure
         filename = f"map"
-        self.save_fig(filename, transparent=False, adjust=(0.02, 0.02, 0.98, 0.9))
+        self.save_fig(filename, transparent=False, adjust=(0.02, 0.02, 0.98, adjust_top))
 
         # Close figure
         plt.close(fig)
@@ -4126,23 +4128,23 @@ if __name__ == '__main__':
         CASE_STUDY_NAME = sys.argv[5]
     else:
         GRANULE_DATE = "2008-06-27T06-29-34ZN" # "2009-02-10T12-33-03ZN"
-        FOLDER_PATH = None #"/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/in/CAL_LID_L1_denoised/" #None # if None, it will try automatic path detection based on information in paths.py
         SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
         SLICE_START = -89.99 # -168.15 # profindex or longitude
         SLICE_END = 116.98 # 178.68 # profindex or longitude
         CASE_STUDY_NAME = None # None
+    FOLDER_PATH = None #"/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/in/CAL_LID_L1_denoised/" #None # if None, it will try automatic path detection based on information in paths.py
     VERSION_CAL_LID_L1 = "V5.00"
     VERSION_CAL_LID_L2 = "V5.00"
     TYPE_CAL_LID_L1 = "Standard"
     TYPE_CAL_LID_L2 = "Standard"
     #-----------------------------------------------------------------------
     # Plot configuration
-    REGULAR_GRIDS = ['333mx30m',] # ['333mx30m', '1kmx60m', '5kmx60m'] # list of regular grids to plot
+    REGULAR_GRIDS = ['5kmx60m',] # ['333mx30m', '1kmx60m', '5kmx60m'] # list of regular grids to plot
     APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
     EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
     INVERT_XAXIS = False
-    YMIN = 8.4
-    YMAX = 30 # None
+    YMIN = -0.5
+    YMAX = 20 # None
     COLORMAP = "FRIENDLY" # "LEGACY": use colormaps of browse images
                           # "FRIENDLY": use colorblind friendly colormaps
     PLOT_ASPECT_RATIO = "browse_colorbar_right" # "browse_colorbar_right", "browse_colorbar_bottom", "spec" or None

@@ -12,6 +12,16 @@ plot_calipso_section () {
               --export=GRANULE_DATE="$1",SLICE_START_END_TYPE="$2",SLICE_START="$3",SLICE_END="$4",CASE_STUDY_NAME="$5" plot_calipso_section.sbatch
 }
 
+# Run plot_2D-McDA_masks.py
+plot_2D-McDA_masks () {
+       jobname="plot_"$1"_"$3"_$4"
+       echo -e "jobname=$jobname"
+       sbatch --job-name=$jobname \
+              --error=./out/slurm/${jobname}.e \
+              --output=./out/slurm/${jobname}.o \
+              --export=GRANULE_DATE="$1",SLICE_START_END_TYPE="$2",SLICE_START="$3",SLICE_END="$4",CASE_STUDY_NAME="$5" plot_2D-McDA_masks.sbatch
+}
+
 case_study_name="Antarctic PSC"
 granule_date="2008-07-17T19-15-43ZN"
 slice_start_end_type='longitude' # 'profindex' or 'longitude'
@@ -102,6 +112,7 @@ slice_start_end_type='longitude' # 'profindex' or 'longitude'
 slice_start=-15.34 # profindex or longitude
 slice_end=-39.11 # profindex or longitude
 plot_calipso_section $granule_date $slice_start_end_type $slice_start $slice_end "$case_study_name"
+plot_2D-McDA_masks $granule_date $slice_start_end_type $slice_start $slice_end "$case_study_name"
 
 case_study_name="Liquid and ice clouds"
 granule_date="2016-06-15T09-59-23ZN"

@@ -451,15 +451,23 @@ if __name__ == '__main__':
 
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
-    INDATA_FOLDER = "/home/ticjo/Documents/Pro/Recherche/codes/projects/2D-McDA/data/output/2D_McDA.v2.0.0/2018/2018_08_31/"
-    GRANULE_DATE = "2018-08-31T21-33-53ZN"
-    GRANULE_SECTION = "" # void if complete file
-    VERSION_2D_McDA = "V2.0.0"
+    if len(sys.argv) > 1:
+        GRANULE_DATE = sys.argv[1]
+        SLICE_START_END_TYPE = sys.argv[2]
+        SLICE_START = float(sys.argv[3])
+        SLICE_END = float(sys.argv[4])
+        CASE_STUDY_NAME = sys.argv[5]
+        GRANULE_SECTION = f"_lon_{sys.argv[3]}_{sys.argv[4]}" # void if complete file
+    else:
+        GRANULE_DATE = "2007-04-10T04-21-17ZN"
+        GRANULE_SECTION = "_lon_-15.34_-39.11" # void if complete file
+        SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
+        SLICE_START = -15.34 # profindex or longitude
+        SLICE_END = -39.11 # profindex or longitude
+    INDATA_FOLDER = "/home/vaillant/codes/projects/2D-McDA/data/output/"
+    VERSION_2D_McDA = "V2.1.2"
     TYPE_2D_McDA = "Dev"
     INPUT_FILE_FORMAT = "netCDF" # "netCDF" or "HDF"
-    SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-    SLICE_START = 63.28 # profindex or longitude
-    SLICE_END = 61.23 # profindex or longitude
     EDGES_REMOVAL = 0 # number of 1/3-km prof to remove on both edges of plot
     MAX_DETECT_LEVEL = 5
     PLOT_ALL_STEPS = False
@@ -467,7 +475,7 @@ if __name__ == '__main__':
     YMIN = -0.5 # None
     YMAX = 20
     BROWSE_IMAGE_ASPECT_RATIO = True
-    FIGURES_PATH = "/home/ticjo/Documents/Pro/Recherche/codes/projects/plot_CALIPSO_section/out/figures/"
+    FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     
     

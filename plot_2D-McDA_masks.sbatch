@@ -8,4 +8,4 @@ source /work_users/vaillant/mambaforge/etc/profile.d/conda.sh
 conda activate plot
 
 # Run program
-./plot_calipso_section.py "$GRANULE_DATE" "$SLICE_START_END_TYPE" "$SLICE_START" "$SLICE_END" "$CASE_STUDY_NAME"
+./plot_2D-McDA_masks.py "$GRANULE_DATE" "$SLICE_START_END_TYPE" "$SLICE_START" "$SLICE_END" "$CASE_STUDY_NAME"
