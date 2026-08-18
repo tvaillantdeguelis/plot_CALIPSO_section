@@ -8,8 +8,8 @@ source /work_users/vaillant/mambaforge/etc/profile.d/conda.sh
 conda activate plot
 
 # Run program
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 : "${CONFIG_FILE:?CONFIG_FILE must point to a complete YAML configuration}"
+: "${PYTHON_SCRIPT:?PYTHON_SCRIPT must point to plot_2D-McDA_masks.py}"
 
 cleanup_config() {
     if [[ "${REMOVE_CONFIG_AFTER_RUN:-0}" == "1" ]]; then
@@ -18,4 +18,4 @@ cleanup_config() {
 }
 trap cleanup_config EXIT
 
-python "$SCRIPT_DIR/plot_2D-McDA_masks.py" "$CONFIG_FILE"
+python "$PYTHON_SCRIPT" "$CONFIG_FILE"

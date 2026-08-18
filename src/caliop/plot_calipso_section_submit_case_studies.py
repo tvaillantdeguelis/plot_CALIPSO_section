@@ -106,7 +106,8 @@ def submit_case(case, configuration_path):
     log_dir = PROJECT_ROOT / "out" / "slurm"
     export = (
         f"ALL,CONFIG_FILE={configuration_path},"
-        "REMOVE_CONFIG_AFTER_RUN=1"
+        "REMOVE_CONFIG_AFTER_RUN=1,"
+        f"PYTHON_SCRIPT={SCRIPT_DIR / 'plot_calipso_section.py'}"
     )
     command = [
         os.environ.get("SBATCH_COMMAND", "sbatch"),
