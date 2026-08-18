@@ -2,6 +2,7 @@
 # coding: utf8
 
 import sys
+from pathlib import Path
 from datetime import datetime
 
 import numpy as np
@@ -17,7 +18,8 @@ import cmocean
 import cmlidar
 import seaborn as sns
 
-sys.path.append("./my_modules/")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT / "my_modules"))
 from standard_outputs import print_time
 from readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon
 from paths import split_granule_date
@@ -699,6 +701,5 @@ if __name__ == '__main__':
 
 
     print_time(tic_main_program)
-
 
 

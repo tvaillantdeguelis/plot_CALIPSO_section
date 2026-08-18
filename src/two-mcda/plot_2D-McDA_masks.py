@@ -3,6 +3,9 @@
 
 import sys
 import os
+import argparse
+from collections.abc import Mapping
+from pathlib import Path
 
 from datetime import datetime
 import numpy as np
@@ -15,10 +18,12 @@ from matplotlib.colors import LogNorm
 from matplotlib.ticker import MultipleLocator, FixedLocator, LogLocator
 import seaborn as sns
 import cmocean
+import yaml
 
-# Import my modules
-# sys.path.insert(0, '/home/vaillant/codes/projects/plot_CALIPSO_section/')
-sys.path.append("./my_modules/")
+# Import project modules
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT / "my_modules"))
+
 from standard_outputs import print_time
 from readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon
 from paths import split_granule_date
@@ -27,6 +32,88 @@ from figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_
 
 
 FILL_VALUE_FLOAT = -9999.0
+
+
+def load_yaml_configuration(config_path, required_keys):
+    """Load one complete single-granule YAML configuration."""
+    path = Path(config_path).expanduser().resolve()
+    if not path.is_file():
+        raise FileNotFoundError(f"Configuration file not found: {path}")
+
+    with path.open(encoding="utf-8") as stream:
+        document = yaml.safe_load(stream)
+    if not isinstance(document, Mapping):
+        raise ValueError(f"The YAML root must be a mapping: {path}")
+
+    document = dict(document)
+    case = document.pop("case", None)
+    if not isinstance(case, Mapping):
+        raise ValueError("The configuration must contain a 'case' mapping")
+
+    required_case_keys = {"granule", "mode", "start", "end"}
+    missing_case_keys = sorted(required_case_keys - case.keys())
+    unknown_case_keys = sorted(case.keys() - required_case_keys - {"name"})
+    if missing_case_keys:
+        raise ValueError(f"Missing case keys: {', '.join(missing_case_keys)}")
+    if unknown_case_keys:
+        raise ValueError(f"Unknown case keys: {', '.join(unknown_case_keys)}")
+    if case["mode"] not in {"longitude", "profindex"}:
+        raise ValueError("case.mode must be either 'longitude' or 'profindex'")
+
+    flattened = {}
+
+    def flatten(mapping):
+        for key, value in mapping.items():
+            if isinstance(value, Mapping):
+                flatten(value)
+                continue
+            normalized_key = str(key).upper()
+            if normalized_key in flattened:
+                raise ValueError(f"Duplicate configuration key: {key}")
+            flattened[normalized_key] = value
+
+    flatten(document)
+    required_keys = set(required_keys)
+    missing = sorted(required_keys - flattened.keys())
+    unknown = sorted(flattened.keys() - required_keys)
+    if missing:
+        raise ValueError(f"Missing configuration keys: {', '.join(missing)}")
+    if unknown:
+        raise ValueError(f"Unknown configuration keys: {', '.join(unknown)}")
+
+    slice_start = float(case["start"])
+    slice_end = float(case["end"])
+    if case["mode"] == "profindex":
+        if not slice_start.is_integer() or not slice_end.is_integer():
+            raise ValueError("Profile-index limits must be integers")
+        slice_start = int(slice_start)
+        slice_end = int(slice_end)
+
+    flattened.update(
+        GRANULE_DATE=str(case["granule"]),
+        SLICE_START_END_TYPE=str(case["mode"]),
+        SLICE_START=slice_start,
+        SLICE_END=slice_end,
+        CASE_STUDY_NAME=case.get("name"),
+        SLICE_START_TEXT=str(case["start"]),
+        SLICE_END_TEXT=str(case["end"]),
+    )
+    for key in ("INDATA_FOLDER", "FIGURES_PATH"):
+        value = flattened.get(key)
+        if value and not Path(value).is_absolute():
+            flattened[key] = str((PROJECT_ROOT / value).resolve())
+    return flattened
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Plot 2D-McDA masks")
+    parser.add_argument(
+        "configuration",
+        nargs="?",
+        default=Path(__file__).with_suffix(".yaml"),
+        help="Complete single-granule YAML configuration.",
+    )
+    return parser.parse_args()
 
 
 class FigureMaker(CALIOPFigureMaker):
@@ -93,7 +180,7 @@ class FigureMaker(CALIOPFigureMaker):
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
         if step:
-            plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)\ %s}$' % (step, VERSION_2D_McDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+            plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)\ %s}$' % (step, VERSION_2D_MCDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         else:
             if channel == '532_par':
                 title = "532\ nm\ parallel\ detection\ feature\ mask"
@@ -103,7 +190,7 @@ class FigureMaker(CALIOPFigureMaker):
                 title = "1064\ nm\ detection\ feature\ mask"
             else:
                 raise ValueError(f"Unknown channel = {channel}")
-            plt.title(r'$\mathbf{%s\ %s}$' % (title, VERSION_2D_McDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+            plt.title(r'$\mathbf{%s\ %s}$' % (title, VERSION_2D_MCDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -160,7 +247,7 @@ class FigureMaker(CALIOPFigureMaker):
             raise ValueError(f"Unknown channel = {channel}")
         plt.clim(1e-1, vmax)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)\ %s}$' % (step, VERSION_2D_McDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)\ %s}$' % (step, VERSION_2D_MCDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -275,7 +362,7 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_McDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_MCDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -338,7 +425,7 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_McDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_MCDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -426,7 +513,7 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, new_mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_McDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_MCDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -448,35 +535,16 @@ class FigureMaker(CALIOPFigureMaker):
 
 if __name__ == '__main__':
     tic_main_program = print_time()
-
-    # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    # PARAMETERS
-    if len(sys.argv) > 1:
-        GRANULE_DATE = sys.argv[1]
-        SLICE_START_END_TYPE = sys.argv[2]
-        SLICE_START = float(sys.argv[3])
-        SLICE_END = float(sys.argv[4])
-        CASE_STUDY_NAME = sys.argv[5]
-        GRANULE_SECTION = f"_lon_{sys.argv[3]}_{sys.argv[4]}" # void if complete file
-    else:
-        GRANULE_DATE = "2007-04-10T04-21-17ZN"
-        GRANULE_SECTION = "_lon_-15.34_-39.11" # void if complete file
-        SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = -15.34 # profindex or longitude
-        SLICE_END = -39.11 # profindex or longitude
-    INDATA_FOLDER = "/home/vaillant/codes/projects/2D-McDA/data/output/"
-    VERSION_2D_McDA = "V2.1.2"
-    TYPE_2D_McDA = "Dev"
-    INPUT_FILE_FORMAT = "netCDF" # "netCDF" or "HDF"
-    EDGES_REMOVAL = 0 # number of 1/3-km prof to remove on both edges of plot
-    MAX_DETECT_LEVEL = 5
-    PLOT_ALL_STEPS = False
-    INVERT_XAXIS = False
-    YMIN = -0.5 # None
-    YMAX = 20
-    BROWSE_IMAGE_ASPECT_RATIO = True
-    FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
-    # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+    args = parse_arguments()
+    globals().update(load_yaml_configuration(
+        args.configuration,
+        {
+            "INDATA_FOLDER", "VERSION_2D_MCDA", "TYPE_2D_MCDA", "INPUT_FILE_FORMAT",
+            "EDGES_REMOVAL", "MAX_DETECT_LEVEL", "PLOT_ALL_STEPS", "INVERT_XAXIS",
+            "YMIN", "YMAX", "BROWSE_IMAGE_ASPECT_RATIO", "FIGURES_PATH",
+        },
+    ))
+    GRANULE_SECTION = f"_lon_{SLICE_START_TEXT}_{SLICE_END_TEXT}"
     
     
     # *******************************
@@ -489,10 +557,10 @@ if __name__ == '__main__':
     
     # Get filename and filepath
     file_extension = "nc" if input_file_format == "netcdf" else "hdf"
-    filename_2d_mcda = f"CAL_LID_L2_2D_McDA-{TYPE_2D_McDA}-{VERSION_2D_McDA.replace('.', '-')}." \
+    filename_2d_mcda = f"CAL_LID_L2_2D_McDA-{TYPE_2D_MCDA}-{VERSION_2D_MCDA.replace('.', '-')}." \
                        f"{GRANULE_DATE}{GRANULE_SECTION}.{file_extension}"
     granule_date_dict = split_granule_date(GRANULE_DATE)
-    datafile = os.path.join(INDATA_FOLDER, f"2D_McDA.{VERSION_2D_McDA.replace('V', 'v')}",
+    datafile = os.path.join(INDATA_FOLDER, f"2D_McDA.{VERSION_2D_MCDA.replace('V', 'v')}",
                             str(granule_date_dict['year']),
                             f"{granule_date_dict['year']}_{granule_date_dict['month']:02d}_"
                             f"{granule_date_dict['day']:02d}",

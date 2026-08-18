@@ -2,6 +2,9 @@
 # coding: utf8
 import os
 import sys
+import argparse
+from collections.abc import Mapping
+from pathlib import Path
 
 import numpy as np
 import matplotlib as mpl
@@ -18,14 +21,99 @@ import re
 import matplotlib.patheffects as pe
 import cmocean
 import cmlidar
+import yaml
 
-sys.path.append("./my_modules/")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT / "my_modules"))
+
 from standard_outputs import print_time
 from readers.calipso_reader import CALIOPRegularGridReader
 from figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
     CALIOPFigureMaker, remove_edges, interactive_pixel_info
 from geotools import UTC_time_CALIPSO, geo_distance, get_monotical_lon, granule_date_decomposition
 from calipso_constants import *
+
+
+def load_yaml_configuration(config_path, required_keys):
+    """Load one complete single-granule YAML configuration."""
+    path = Path(config_path).expanduser().resolve()
+    if not path.is_file():
+        raise FileNotFoundError(f"Configuration file not found: {path}")
+
+    with path.open(encoding="utf-8") as stream:
+        document = yaml.safe_load(stream)
+    if not isinstance(document, Mapping):
+        raise ValueError(f"The YAML root must be a mapping: {path}")
+
+    document = dict(document)
+    case = document.pop("case", None)
+    if not isinstance(case, Mapping):
+        raise ValueError("The configuration must contain a 'case' mapping")
+
+    required_case_keys = {"granule", "mode", "start", "end"}
+    missing_case_keys = sorted(required_case_keys - case.keys())
+    unknown_case_keys = sorted(case.keys() - required_case_keys - {"name"})
+    if missing_case_keys:
+        raise ValueError(f"Missing case keys: {', '.join(missing_case_keys)}")
+    if unknown_case_keys:
+        raise ValueError(f"Unknown case keys: {', '.join(unknown_case_keys)}")
+    if case["mode"] not in {"longitude", "profindex"}:
+        raise ValueError("case.mode must be either 'longitude' or 'profindex'")
+
+    flattened = {}
+
+    def flatten(mapping):
+        for key, value in mapping.items():
+            if isinstance(value, Mapping):
+                flatten(value)
+                continue
+            normalized_key = str(key).upper()
+            if normalized_key in flattened:
+                raise ValueError(f"Duplicate configuration key: {key}")
+            flattened[normalized_key] = value
+
+    flatten(document)
+    required_keys = set(required_keys)
+    missing = sorted(required_keys - flattened.keys())
+    unknown = sorted(flattened.keys() - required_keys)
+    if missing:
+        raise ValueError(f"Missing configuration keys: {', '.join(missing)}")
+    if unknown:
+        raise ValueError(f"Unknown configuration keys: {', '.join(unknown)}")
+
+    slice_start = float(case["start"])
+    slice_end = float(case["end"])
+    if case["mode"] == "profindex":
+        if not slice_start.is_integer() or not slice_end.is_integer():
+            raise ValueError("Profile-index limits must be integers")
+        slice_start = int(slice_start)
+        slice_end = int(slice_end)
+
+    flattened.update(
+        GRANULE_DATE=str(case["granule"]),
+        SLICE_START_END_TYPE=str(case["mode"]),
+        SLICE_START=slice_start,
+        SLICE_END=slice_end,
+        CASE_STUDY_NAME=case.get("name"),
+        SLICE_START_TEXT=str(case["start"]),
+        SLICE_END_TEXT=str(case["end"]),
+    )
+    for key in ("FOLDER_PATH", "FIGURES_PATH"):
+        value = flattened.get(key)
+        if value and not Path(value).is_absolute():
+            flattened[key] = str((PROJECT_ROOT / value).resolve())
+    return flattened
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Plot a CALIOP section")
+    parser.add_argument(
+        "configuration",
+        nargs="?",
+        default=Path(__file__).with_suffix(".yaml"),
+        help="Complete single-granule YAML configuration.",
+    )
+    return parser.parse_args()
 
 
 def get_cal_l1_keys():
@@ -4117,88 +4205,31 @@ class FigureMaker(CALIOPFigureMaker):
         
 if __name__ == '__main__':
     tic_main_program = print_time()
-    
-    # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-    # Data configuration
-    if len(sys.argv) > 1:
-        GRANULE_DATE = sys.argv[1]
-        SLICE_START_END_TYPE = sys.argv[2]
-        SLICE_START = float(sys.argv[3])
-        SLICE_END = float(sys.argv[4])
-        CASE_STUDY_NAME = sys.argv[5]
-    else:
-        GRANULE_DATE = "2008-06-27T06-29-34ZN" # "2009-02-10T12-33-03ZN"
-        SLICE_START_END_TYPE = 'longitude' # 'profindex' or 'longitude'
-        SLICE_START = -89.99 # -168.15 # profindex or longitude
-        SLICE_END = 116.98 # 178.68 # profindex or longitude
-        CASE_STUDY_NAME = None # None
-    FOLDER_PATH = None #"/home/vaillant/codes/projects/2D_CALIOP/2D_McDA/in/CAL_LID_L1_denoised/" #None # if None, it will try automatic path detection based on information in paths.py
-    VERSION_CAL_LID_L1 = "V5.00"
-    VERSION_CAL_LID_L2 = "V5.00"
-    TYPE_CAL_LID_L1 = "Standard"
-    TYPE_CAL_LID_L2 = "Standard"
-    #-----------------------------------------------------------------------
-    # Plot configuration
-    REGULAR_GRIDS = ['5kmx60m',] # ['333mx30m', '1kmx60m', '5kmx60m'] # list of regular grids to plot
-    APPLY_DECONVOLUTION = False # apply Xiaomei Lu's deconvolution matrix
-    EDGES_REMOVAL = 0 # 15*50 # number of 1/3-km profiles to remove on both edges of plot
-    INVERT_XAXIS = False
-    YMIN = -0.5
-    YMAX = 20 # None
-    COLORMAP = "FRIENDLY" # "LEGACY": use colormaps of browse images
-                          # "FRIENDLY": use colorblind friendly colormaps
-    PLOT_ASPECT_RATIO = "browse_colorbar_right" # "browse_colorbar_right", "browse_colorbar_bottom", "spec" or None
-    FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
-    FIGURES_FILETYPE = 'png' #'png' 'svg'
-    #-----------------------------------------------------------------------
-    # Plot flags
-    PLOT_MAP                      = True
-    PLOT_AB_532                   = False
-    PLOT_AB_532_HIST              = False
-    PLOT_AB_532_PAR               = True
-    PLOT_AB_532_PAR_HIST          = False
-    PLOT_AB_532_PER               = True
-    PLOT_AB_532_PER_HIST          = False
-    PLOT_AB_1064                  = True
-    PLOT_AB_1064_HIST             = False
-    PLOT_ACR                      = True
-    PLOT_DR                       = True
-    PLOT_AB_MOL_532               = False
-    PLOT_AB_MOL_532_PAR           = False
-    PLOT_AB_MOL_532_PER           = False
-    PLOT_AB_MOL_1064              = False
-    PLOT_ASR_532_STD              = False
-    PLOT_ASR_532_PAR_STD          = False
-    PLOT_ASR_532_PER_STD          = False
-    PLOT_ASR_1064_STD             = False
-    PLOT_ASR_532                  = False
-    PLOT_ASR_532_HIST             = False
-    PLOT_ASR_532_PAR              = False
-    PLOT_ASR_532_PAR_HIST         = False
-    PLOT_ASR_532_PER              = False
-    PLOT_ASR_532_PER_HIST         = False
-    PLOT_ASR_1064                 = False
-    PLOT_ASR_1064_HIST            = False
-    PLOT_ASR_532_ABOVE_STD        = False
-    PLOT_ASR_532_PAR_ABOVE_STD    = False
-    PLOT_ASR_532_PER_ABOVE_STD    = False
-    PLOT_ASR_1064_ABOVE_STD       = False
-    PLOT_PARAMS_532_PAR           = True
-    PLOT_PARAMS_532_PER           = False   
-    PLOT_PARAMS_1064              = False
-    PLOT_NB_BINS_SHIFT            = False
-    PLOT_VFM_FEATURE_TYPE         = True
-    PLOT_VFM_HORIZONTAL_AVERAGING = False
-    PLOT_VFM_PHASE                = False
-    PLOT_VFM_SUBTYPE              = False
-    PLOT_FEATURE_DR               = False
-    PLOT_FEATURE_DR1064           = False
-    PLOT_FEATURE_ACR              = False
-    PLOT_FEATURE_IAB532           = False
-    PLOT_FEATURE_TEMP             = False
-    PLOT_EXT532                   = False
-    PLOT_EXT1064                  = False
-    # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+    args = parse_arguments()
+    globals().update(load_yaml_configuration(
+        args.configuration,
+        {
+            "FOLDER_PATH", "VERSION_CAL_LID_L1", "VERSION_CAL_LID_L2",
+            "TYPE_CAL_LID_L1", "TYPE_CAL_LID_L2", "REGULAR_GRIDS",
+            "APPLY_DECONVOLUTION", "EDGES_REMOVAL", "INVERT_XAXIS", "YMIN",
+            "YMAX", "COLORMAP", "PLOT_ASPECT_RATIO", "FIGURES_PATH",
+            "FIGURES_FILETYPE", "PLOT_MAP", "PLOT_AB_532", "PLOT_AB_532_HIST",
+            "PLOT_AB_532_PAR", "PLOT_AB_532_PAR_HIST", "PLOT_AB_532_PER",
+            "PLOT_AB_532_PER_HIST", "PLOT_AB_1064", "PLOT_AB_1064_HIST",
+            "PLOT_ACR", "PLOT_DR", "PLOT_AB_MOL_532", "PLOT_AB_MOL_532_PAR",
+            "PLOT_AB_MOL_532_PER", "PLOT_AB_MOL_1064", "PLOT_ASR_532_STD",
+            "PLOT_ASR_532_PAR_STD", "PLOT_ASR_532_PER_STD", "PLOT_ASR_1064_STD",
+            "PLOT_ASR_532", "PLOT_ASR_532_HIST", "PLOT_ASR_532_PAR",
+            "PLOT_ASR_532_PAR_HIST", "PLOT_ASR_532_PER", "PLOT_ASR_532_PER_HIST",
+            "PLOT_ASR_1064", "PLOT_ASR_1064_HIST", "PLOT_ASR_532_ABOVE_STD",
+            "PLOT_ASR_532_PAR_ABOVE_STD", "PLOT_ASR_532_PER_ABOVE_STD",
+            "PLOT_ASR_1064_ABOVE_STD", "PLOT_PARAMS_532_PAR", "PLOT_PARAMS_532_PER",
+            "PLOT_PARAMS_1064", "PLOT_NB_BINS_SHIFT", "PLOT_VFM_FEATURE_TYPE",
+            "PLOT_VFM_HORIZONTAL_AVERAGING", "PLOT_VFM_PHASE", "PLOT_VFM_SUBTYPE",
+            "PLOT_FEATURE_DR", "PLOT_FEATURE_DR1064", "PLOT_FEATURE_ACR",
+            "PLOT_FEATURE_IAB532", "PLOT_FEATURE_TEMP", "PLOT_EXT532", "PLOT_EXT1064",
+        },
+    ))
     
     
     # ***************************

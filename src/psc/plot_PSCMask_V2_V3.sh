@@ -2,6 +2,7 @@
 
 FOLDER="/home/vaillant/codes/projects/2D_McDA_PSC/out/data/2D_McDA_PSC.v1.2.1/2010/"
 FIGURES_PATH="/home/vaillant/codes/projects/2D_McDA_PSC/out/figures/quicklooks/"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 # Find all .hdf files and process them
 find "$FOLDER" -type f -name "CAL_LID_L2_2D_McDA_PSC-Prototype*.hdf" | sort | while read -r filepath; do
@@ -30,5 +31,5 @@ find "$FOLDER" -type f -name "CAL_LID_L2_2D_McDA_PSC-Prototype*.hdf" | sort | wh
 
     # Call the Python script with the granule
     echo "$granule $lon_start $lon_end"
-    ./plot_psc_mask.py "$granule" "$lon_start" "$lon_end" "$FIGURES_PATH"
+    python "$SCRIPT_DIR/plot_PSCMask_V2_V3.py" "$granule" "$lon_start" "$lon_end" "$FIGURES_PATH"
 done

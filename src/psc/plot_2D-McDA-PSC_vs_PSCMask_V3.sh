@@ -1,6 +1,7 @@
 #!/bin/bash
 
-SCRIPT="plot_2D-McDA-PSC_vs_PSCMask_V3.py"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+SCRIPT="$SCRIPT_DIR/plot_2D-McDA-PSC_vs_PSCMask_V3.py"
 VERSION_2D_McDA="V2.6.1"
 DATA_ROOT="/home/vaillant/codes/projects/2D_McDA_PSC/out/data/2D_McDA_PSC.${VERSION_2D_McDA,,}"
 

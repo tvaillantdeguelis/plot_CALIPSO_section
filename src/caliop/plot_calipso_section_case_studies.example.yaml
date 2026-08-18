@@ -1,0 +1,69 @@
+case_studies:
+  include: ../case_studies.yaml
+
+data:
+  folder_path: null
+  version_cal_lid_l1: V5.00
+  version_cal_lid_l2: V5.00
+  type_cal_lid_l1: Standard
+  type_cal_lid_l2: Standard
+
+plot:
+  regular_grids: [5kmx60m]
+  apply_deconvolution: false
+  edges_removal: 0
+  invert_xaxis: false
+  ymin: -0.5
+  ymax: 20
+  colormap: FRIENDLY
+  plot_aspect_ratio: browse_colorbar_right
+  figures_path: out/figures
+  figures_filetype: png
+
+flags:
+  plot_map: true
+  plot_ab_532: false
+  plot_ab_532_hist: false
+  plot_ab_532_par: true
+  plot_ab_532_par_hist: false
+  plot_ab_532_per: true
+  plot_ab_532_per_hist: false
+  plot_ab_1064: true
+  plot_ab_1064_hist: false
+  plot_acr: true
+  plot_dr: true
+  plot_ab_mol_532: false
+  plot_ab_mol_532_par: false
+  plot_ab_mol_532_per: false
+  plot_ab_mol_1064: false
+  plot_asr_532_std: false
+  plot_asr_532_par_std: false
+  plot_asr_532_per_std: false
+  plot_asr_1064_std: false
+  plot_asr_532: false
+  plot_asr_532_hist: false
+  plot_asr_532_par: false
+  plot_asr_532_par_hist: false
+  plot_asr_532_per: false
+  plot_asr_532_per_hist: false
+  plot_asr_1064: false
+  plot_asr_1064_hist: false
+  plot_asr_532_above_std: false
+  plot_asr_532_par_above_std: false
+  plot_asr_532_per_above_std: false
+  plot_asr_1064_above_std: false
+  plot_params_532_par: true
+  plot_params_532_per: false
+  plot_params_1064: false
+  plot_nb_bins_shift: false
+  plot_vfm_feature_type: true
+  plot_vfm_horizontal_averaging: false
+  plot_vfm_phase: false
+  plot_vfm_subtype: false
+  plot_feature_dr: false
+  plot_feature_dr1064: false
+  plot_feature_acr: false
+  plot_feature_iab532: false
+  plot_feature_temp: false
+  plot_ext532: false
+  plot_ext1064: false

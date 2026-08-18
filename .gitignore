@@ -168,6 +168,11 @@ cython_debug/
 *.code-workspace
 *.vscode/
 
-# Folders
-out/*
-test/*
+# Project-local configuration and generated output
+/src/caliop/plot_calipso_section.yaml
+/src/caliop/plot_calipso_section_case_studies.yaml
+/src/two-mcda/plot_2D-McDA_masks.yaml
+/src/two-mcda/plot_2D-McDA_masks_case_studies.yaml
+/src/case_studies.yaml
+/out/
+/test/

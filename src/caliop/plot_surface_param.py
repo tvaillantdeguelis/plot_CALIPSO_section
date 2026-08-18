@@ -2,6 +2,7 @@
 # coding: utf8
 import os
 import sys
+from pathlib import Path
 
 import numpy as np
 import matplotlib as mpl
@@ -13,6 +14,8 @@ import cartopy
 import cartopy.crs as ccrs
 import copy
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT / "my_modules"))
 from standard_outputs import print_time
 from readers.calipso_reader import CALIOPReader
 from figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \

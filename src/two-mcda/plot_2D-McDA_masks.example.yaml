@@ -1,0 +1,24 @@
+case:
+  granule: 2007-04-10T04-21-17ZN
+  mode: longitude  # longitude or profindex
+  start: -15.34
+  end: -39.11
+  name: "Cloud chaos: HOI ROI H2O"
+
+data:
+  indata_folder: /home/vaillant/codes/projects/2D-McDA/data/output
+  version_2d_mcda: V2.1.2
+  type_2d_mcda: Dev
+  input_file_format: netCDF
+
+plot:
+  edges_removal: 0
+  max_detect_level: 5
+  invert_xaxis: false
+  ymin: -0.5
+  ymax: 20
+  browse_image_aspect_ratio: true
+  figures_path: out/figures
+
+flags:
+  plot_all_steps: false

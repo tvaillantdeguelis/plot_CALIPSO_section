@@ -3,6 +3,7 @@
 
 import sys
 import os
+from pathlib import Path
 
 from datetime import datetime
 import numpy as np
@@ -14,7 +15,8 @@ from matplotlib.colors import LogNorm
 from matplotlib.ticker import MultipleLocator, FixedLocator, LogLocator
 import cmocean
 
-sys.path.append("./my_modules/")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT / "my_modules"))
 from standard_outputs import print_time
 from readers.calipso_reader import get_prof_min_max_indexes_from_lon
 from paths import split_granule_date

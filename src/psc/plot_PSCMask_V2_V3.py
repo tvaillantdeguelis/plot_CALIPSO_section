@@ -12,7 +12,10 @@ from matplotlib.ticker import MultipleLocator, FixedLocator, LogLocator
 import seaborn as sns
 import os
 import sys
+from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PROJECT_ROOT / "my_modules"))
 from standard_outputs import print_time
 from readers.calipso_reader import CALIPSOReader, get_prof_min_max_indexes_from_lon
 from figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_xaxis, \
@@ -84,7 +87,7 @@ class FigureMaker(CALIOPFigureMaker):
                          va='center', fontsize=fontsize_clabel, transform=cbar.ax.transAxes)
        
         # Save figure
-        filename = f"PSC_Composition_{VERSION_CAL_LID_L2_PSCMask}"
+        filename = f"PSC{VERSION_CAL_LID_L2_PSCMask}_composition_mask"
         self.save_fig(filename)
         
         # Close figure
@@ -144,7 +147,7 @@ class FigureMaker(CALIOPFigureMaker):
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
         self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(f'PSC mask {VERSION_CAL_LID_L2_PSCMask}', weight='bold', y=self.axes_title_pad)
+        plt.title(f'PSC mask {VERSION_CAL_LID_L2_PSCMask}', weight='bold', fontsize=self.axes_titlesize, y=self.axes_title_pad)
 
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -156,11 +159,71 @@ class FigureMaker(CALIOPFigureMaker):
                          va='center', fontsize=fontsize_clabel, transform=cbar.ax.transAxes)
        
         # Save figure
-        filename = f"PSC_Feature_Mask_{VERSION_CAL_LID_L2_PSCMask}"
+        filename = f"PSC{VERSION_CAL_LID_L2_PSCMask}_feature_mask"
         self.save_fig(filename)
         
         # Close figure
         plt.close(fig)
+
+
+    def plot_psc_signal_distributions(self, atten_1064, par_532, perp_532, psc_composition):
+
+        # Map PSC composition labels to class names
+        class_labels = {
+            1: ("STS", "#00FA9A"),
+            2: ("NAT", "#FFBF00"),
+            4: ("Ice", "#00BBFF"),
+            5: ("Enhanced NAT", "#FF0000"),
+            6: ("Wave ice", "#4700C3")
+        }
+
+        # Channels
+        channels = {
+            "1064 nm": atten_1064,
+            "532 nm parallel": par_532,
+            "532 nm perpendicular": perp_532
+        }
+
+        # Bins for log10 histograms
+        bins = np.logspace(-7, -2, 60)
+
+        # Dictionary to store estimated mean/std
+        log_gaussian_params = {label: {} for label in class_labels}
+
+        # Plot
+        fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+        for ax, (ch_name, ch_data) in zip(axes, channels.items()):
+            for label, (name, color) in class_labels.items():
+                mask = psc_composition == label
+                if np.any(mask):
+                    values = ch_data[mask].flatten()
+                    values = values[values > 0]  # remove zeros
+                    log_values = np.log10(values)
+
+                    # Estimate mean and std in log space
+                    mean_log = np.mean(log_values)
+                    std_log = np.std(log_values)
+                    log_gaussian_params[label][ch_name] = (mean_log, std_log)
+
+                    # Plot histogram as solid line (step)
+                    ax.hist(values, bins=bins, histtype='step', lw=1.5, color=color, label=name)
+
+            ax.set_xscale("log")
+            ax.set_xlim(1e-7, 1e-2)
+            ax.set_xlabel(f"Backscatter ({ch_name}) (km⁻¹ sr⁻¹)")
+            ax.grid(True, alpha=0.3)
+
+        axes[0].set_ylabel("Number of pixels")
+        axes[0].legend(fontsize=8)
+        plt.suptitle("PSC Lidar Signal Distributions per Class", weight='bold', y=0.9)
+
+        # Save figure
+        filename = f"PSC{VERSION_CAL_LID_L2_PSCMask}_signal_distributions"
+        self.save_fig(filename)
+        plt.close(fig)
+
+        # Return log Gaussian parameters
+        return log_gaussian_params
 
 
 if __name__ == '__main__':
@@ -168,18 +231,32 @@ if __name__ == '__main__':
 
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     # PARAMETERS
-    INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
-    GRANULE_DATE = sys.argv[1] #"2010-01-18T00-19-57ZN"
-    VERSION_CAL_LID_L2_PSCMask = "V2.00"
-    TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
-    SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
-    SLICE_START = float(sys.argv[2]) # 170.59 # profindex or longitude
-    SLICE_END = float(sys.argv[3]) # 27.95 # profindex or longitude
-    EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
-    INVERT_XAXIS = False
-    YMIN = 15
-    YMAX = 30
-    FIGURES_PATH = sys.argv[4] #"/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
+    if len(sys.argv) > 1:
+        INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
+        GRANULE_DATE = sys.argv[1]
+        VERSION_CAL_LID_L2_PSCMask = "V2.00"
+        TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
+        SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
+        SLICE_START = float(sys.argv[2]) # profindex or longitude
+        SLICE_END = float(sys.argv[3]) # profindex or longitude
+        EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
+        INVERT_XAXIS = False
+        YMIN = 8.4
+        YMAX = 30
+        FIGURES_PATH = sys.argv[4] #"/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
+    else:
+        INDATA_FOLDER = "/DATA/LIENS/CALIOP/"
+        GRANULE_DATE = "2010-01-18T00-19-57ZN"
+        VERSION_CAL_LID_L2_PSCMask = "V3.00"
+        TYPE_CAL_LID_L2_PSCMask = "Standard" # "Standard", "Prov"
+        SLICE_START_END_TYPE = 'longitude' # 'profindex' (of the PSCMask file) or 'longitude'
+        SLICE_START = 170.59 # profindex or longitude
+        SLICE_END = 27.95 # profindex or longitude
+        EDGES_REMOVAL = 0 # number of prof to remove on both edges of plot
+        INVERT_XAXIS = False
+        YMIN = 8.4
+        YMAX = 30
+        FIGURES_PATH = "/home/vaillant/codes/projects/plot_CALIPSO_section/out/figures/"
     # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
     
     
@@ -206,12 +283,12 @@ if __name__ == '__main__':
     granule_names = []
     for i_filenames in np.arange(l1_input_filenames.shape[0]):
         granule_name = ''
-        if VERSION_CAL_LID_L2_PSCMask == "V2.00":
+        if VERSION_CAL_LID_L2_PSCMask in ("V2.00", "V3.00"):
             granule_name_char_indexes = np.arange(26, 47)
         elif VERSION_CAL_LID_L2_PSCMask == "V1.00":
             granule_name_char_indexes = np.arange(27, 48)
         else:
-            sys.exit(f"Define 'granule_name_char_indexes' for VERSION_CAL_LID_L2_PSCMask = {VERSION_CAL_LID_L2_PSCMask}")
+            raise ValueError(f"Define 'granule_name_char_indexes' for VERSION_CAL_LID_L2_PSCMask = {VERSION_CAL_LID_L2_PSCMask}")
         for i_char in granule_name_char_indexes:
             granule_name = granule_name + l1_input_filenames[i_filenames][i_char].decode('UTF-8')
         granule_names.append(granule_name)
@@ -250,7 +327,10 @@ if __name__ == '__main__':
         "Profile_UTC_Time",
         "Altitude",
         "PSC_Feature_Mask",
-        "PSC_Composition"
+        "PSC_Composition",
+        "Total_Attenuated_Backscatter_1064",
+        "Parallel_Attenuated_Backscatter_532",
+        "Perpendicular_Attenuated_Backscatter_532"
     ]
     for key in cal_psc_keys:
         data_dict_cal_psc[key] = cal_psc.get_data(key, prof_min, prof_max, 'profindex')
@@ -283,5 +363,21 @@ if __name__ == '__main__':
 
     # Plot PSC feature mask
     plot_fig.plot_psc_mask(data_dict_cal_psc["PSC_Feature_Mask"])
+    
+    # Plot signal distributions
+    log_gaussian_params = plot_fig.plot_psc_signal_distributions(
+        atten_1064=data_dict_cal_psc["Total_Attenuated_Backscatter_1064"],
+        par_532=data_dict_cal_psc["Parallel_Attenuated_Backscatter_532"],
+        perp_532=data_dict_cal_psc["Perpendicular_Attenuated_Backscatter_532"],
+        psc_composition=data_dict_cal_psc["PSC_Composition"]
+    )
+
+    # Print all estimated means and stds
+    print("\nEstimated log-Gaussian parameters (log10 space):")
+    for label, channel_dict in log_gaussian_params.items():
+        class_name = {1:"STS", 2:"NAT", 4:"Ice", 5:"Enhanced NAT", 6:"Wave ice"}[label]
+        print(f"\nClass: {class_name} (label={label})")
+        for channel, (mean_log, std_log) in channel_dict.items():
+            print(f"  {channel}: mean = {mean_log:.3f}, std = {std_log:.3f}")
     
     print_time(tic_main_program)
