@@ -1,179 +1,139 @@
 case_studies:
-  - id: antarctic-psc
-    name: Antarctic PSC
+  - name: Antarctic PSC
     enabled: true
-    targets: [caliop]
     granule: 2008-07-17T19-15-43ZN
     mode: longitude
     start: 83.89
     end: 7.65
 
-  - id: antarctic-ice-wave-psc
-    name: Antarctic ice wave PSC
-    enabled: false
-    targets: [caliop]
+  - name: Antarctic ice wave PSC
+    enabled: true
     granule: 2008-07-17T19-15-43ZN
     mode: longitude
     start: 7.34
     end: -68.77
 
-  - id: arctic-psc
-    name: Arctic PSC
-    enabled: false
-    targets: [caliop]
+  - name: Arctic PSC
+    enabled: true
     granule: 2010-01-18T00-19-57ZN
     mode: longitude
     start: 170.68
     end: 27.93
 
-  - id: antarctic-faint-psc
-    name: Antarctic faint PSC
-    enabled: false
-    targets: [caliop]
+  - name: Antarctic faint PSC
+    enabled: true
     granule: 2011-06-25T00-11-52ZN
     mode: longitude
     start: 5.95
     end: -150.07
 
-  - id: arctic-snow-ice-surfaces
-    name: Artic snow/ice surfaces
+  - name: Artic snow/ice surfaces
     enabled: true
-    targets: [caliop]
     granule: 2017-02-10T23-46-03ZD
     mode: longitude
     start: -167.35
     end: 146.90
 
-  - id: strongly-depolarizing-cirrus
-    name: Strongly depolarizing cirrus
+  - name: Strongly depolarizing cirrus
     enabled: true
-    targets: [caliop]
     granule: 2017-02-10T00-41-35ZD
     mode: longitude
     start: -154.50
     end: -169.64
 
-  - id: strongly-depolarizing-low-cloud
-    name: Strongly depolarizing low cloud
+  - name: Strongly depolarizing low cloud
     enabled: true
-    targets: [caliop]
     granule: 2017-02-10T18-02-57ZN
     mode: longitude
     start: 120.78
     end: 108.36
 
-  - id: pyrocb-and-smoke
-    name: PyroCb smokes vs non-depolarizing smoke
+  - name: PyroCb smokes vs non-depolarizing smoke
     enabled: true
-    targets: [caliop]
     granule: 2017-08-20T00-58-21ZN
     mode: longitude
     start: 30.45
     end: 10.81
 
-  - id: dust-vs-smoke-night
-    name: Dust vs Smoke (Night)
+  - name: Dust vs Smoke (Night)
     enabled: true
-    targets: [caliop]
     granule: 2019-07-15T00-58-53ZN
     mode: longitude
     start: 16.00
     end: 5.00
 
-  - id: dust-vs-smoke-day
-    name: Dust vs Smoke (Day)
+  - name: Dust vs Smoke (Day)
     enabled: true
-    targets: [caliop]
     granule: 2019-07-15T13-15-00ZD
     mode: longitude
     start: 8.30
     end: -2.62
 
-  - id: australian-bushfire-smoke
-    name: Smoke from Australian bushfires
+  - name: Smoke from Australian bushfires
     enabled: true
-    targets: [caliop]
     granule: 2009-02-10T12-33-03ZN
     mode: longitude
     start: -168.15
     end: 178.68
 
-  - id: smoke-over-cirrus
-    name: Smoke over cirrus
+  - name: Smoke over cirrus
     enabled: true
-    targets: [caliop]
     granule: 2012-05-12T11-31-08ZN
     mode: longitude
     start: -132.29
     end: -148.26
 
-  - id: cloud-chaos
-    name: "Cloud chaos: HOI ROI H2O"
+  - name: "Cloud chaos: HOI ROI H2O"
     enabled: true
-    targets: [caliop, two-mcda]
     granule: 2007-04-10T04-21-17ZN
     mode: longitude
     start: -15.34
     end: -39.11
 
-  - id: liquid-and-ice-clouds
-    name: Liquid and ice clouds
+  - name: Liquid and ice clouds
     enabled: true
-    targets: [caliop]
     granule: 2016-06-15T09-59-23ZN
     mode: longitude
     start: -111.76
     end: -126.11
 
-  - id: complex-clouds
-    name: Complex clouds
+  - name: Complex clouds
     enabled: true
-    targets: [caliop]
     granule: 2008-08-22T12-13-19ZN
     mode: longitude
     start: -137.23
     end: -157.47
 
-  - id: yorks-opaque-cirrus
-    name: Yorks et al. (2011) opaque cirrus
-    enabled: false
-    targets: [caliop]
+  - name: Yorks et al. (2011) opaque cirrus
+    enabled: true
     granule: 2006-08-11T07-52-34ZN
     mode: longitude
     start: -87
     end: -88.6
 
-  - id: dust-and-clouds
-    name: Dust and clouds
+  - name: Dust and clouds
     enabled: true
-    targets: [caliop]
     granule: 2016-07-04T12-55-03ZD
     mode: longitude
     start: 11.70
     end: 0.77
 
-  - id: saharan-dust-storm
-    name: Saharan dust storm
+  - name: Saharan dust storm
     enabled: true
-    targets: [caliop]
     granule: 2018-06-18T02-53-21ZN
     mode: longitude
     start: -5.13
     end: -19.47
 
-  - id: antarctica-surface
-    name: Antarctica surface
+  - name: Antarctica surface
     enabled: true
-    targets: [caliop]
     granule: 2010-06-14T14-13-41ZN
     mode: longitude
     start: 158.87
     end: 64.36
 
-  - id: dust-plume
-    name: Dust plume
+  - name: Dust plume
     enabled: true
-    targets: [caliop]
     granule: 2014-06-23T15-11-54ZD
     mode: longitude
     start: -22.53

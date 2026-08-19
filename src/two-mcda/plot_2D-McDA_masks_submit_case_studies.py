@@ -15,7 +15,6 @@ import yaml
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
-TARGET = "two-mcda"
 
 
 def load_yaml(path):
@@ -49,7 +48,7 @@ def load_batch_configuration(path):
 
 def selected_case_studies(case_studies):
     required = {
-        "id", "name", "granule", "mode", "start", "end",
+        "name", "granule", "mode", "start", "end",
     }
     for case in case_studies:
         if not isinstance(case, Mapping):
@@ -57,16 +56,13 @@ def selected_case_studies(case_studies):
         missing = sorted(required - case.keys())
         if missing:
             raise ValueError(
-                f"Case study '{case.get('id', '?')}' is missing: {', '.join(missing)}"
+                f"Case study '{case.get('name', '?')}' is missing: {', '.join(missing)}"
             )
-        targets = case.get("targets")
-        if targets is not None and not isinstance(targets, list):
-            raise ValueError(f"targets must be a list for case study '{case['id']}'")
         if case["mode"] not in {"longitude", "profindex"}:
             raise ValueError(
-                f"Invalid mode for case study '{case['id']}'"
+                f"Invalid mode for case study '{case['name']}'"
             )
-        if case.get("enabled", True) and (targets is None or TARGET in targets):
+        if case.get("enabled", True):
             yield case
 
 
@@ -82,17 +78,17 @@ def single_case_configuration(batch, case):
     return {"case": configuration.pop("case"), **configuration}
 
 
-def write_temporary_configuration(configuration, case_id):
+def write_temporary_configuration(configuration, granule):
     config_dir = Path(os.environ.get(
         "SLURM_CONFIG_DIR",
         PROJECT_ROOT / "out" / "slurm" / "configs",
     )).expanduser().resolve()
     config_dir.mkdir(parents=True, exist_ok=True)
-    safe_id = re.sub(r"[^A-Za-z0-9_-]+", "-", str(case_id)).strip("-")
+    safe_granule = re.sub(r"[^A-Za-z0-9_-]+", "-", str(granule)).strip("-")
     with tempfile.NamedTemporaryFile(
         mode="w",
         encoding="utf-8",
-        prefix=f"plot_2D-McDA_masks_{safe_id}_",
+        prefix=f"plot_2D-McDA_masks_{safe_granule}_",
         suffix=".yaml",
         dir=config_dir,
         delete=False,
@@ -145,7 +141,7 @@ def main():
     batch, case_studies = load_batch_configuration(args.configuration)
     for case in selected_case_studies(case_studies):
         configuration = single_case_configuration(batch, case)
-        temporary_path = write_temporary_configuration(configuration, case["id"])
+        temporary_path = write_temporary_configuration(configuration, case["granule"])
         submit_case(case, temporary_path)
 
 

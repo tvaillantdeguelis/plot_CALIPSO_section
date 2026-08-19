@@ -53,8 +53,8 @@ When run from the script directory, this is simply
 
 ## Batch run of case studies
 
-Set `enabled` and `targets` in `src/case_studies.yaml` to select the jobs. The
-available targets are `caliop` and `two-mcda`.
+Set `enabled` in `src/case_studies.yaml` to select the jobs. Both batch
+launchers submit every case study for which `enabled` is `true`.
 
 Each batch YAML contains the common `data`, `plot`, and `flags` settings plus an
 explicit include resolved relative to that YAML:
