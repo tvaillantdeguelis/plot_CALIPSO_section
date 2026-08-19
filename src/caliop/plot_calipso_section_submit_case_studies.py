@@ -102,7 +102,11 @@ def write_temporary_configuration(configuration, case_id):
 
 
 def submit_case(case, configuration_path):
-    job_name = f"caliop_{case['id']}"
+    mode = {"longitude": "lon", "profindex": "prof"}[case["mode"]]
+    job_name = (
+        f"plot_CALIOP_{case['granule']}_{mode}_"
+        f"{case['start']}_{case['end']}"
+    )
     log_dir = PROJECT_ROOT / "out" / "slurm"
     export = (
         f"ALL,CONFIG_FILE={configuration_path},"
