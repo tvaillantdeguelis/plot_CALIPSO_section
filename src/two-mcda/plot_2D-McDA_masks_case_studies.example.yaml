@@ -3,7 +3,7 @@ case_studies:
 
 data:
   indata_folder: /home/vaillant/codes/projects/2D-McDA/data/output
-  version_2d_mcda: V2.1.2
+  version_2d_mcda: V2.2.0
   type_2d_mcda: Dev
   input_file_format: netCDF
 
