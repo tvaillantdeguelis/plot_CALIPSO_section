@@ -33,6 +33,88 @@ from figuretools import setstyle, takecmap, cm2in, compute_bounds, lat_lon_dist_
 
 FILL_VALUE_FLOAT = -9999.0
 
+ALL_CHANNELS = ("532_par", "532_per", "1064")
+
+# Development variables of each channel: detection flags per step, attenuated
+# scattering ratio per step, and cumulative two-way transmittance.
+STEP_VARIABLES = {
+    "532_par": ("Parallel_Detection_Flags_532_steps",
+                "Parallel_Attenuated_Scattering_Ratio_532_steps",
+                "Parallel_CumulativeTwoWayTransmittance_532"),
+    "532_per": ("Perpendicular_Detection_Flags_532_steps",
+                "Perpendicular_Attenuated_Scattering_Ratio_532_steps",
+                "Perpendicular_CumulativeTwoWayTransmittance_532"),
+    "1064": ("Detection_Flags_1064_steps",
+             "Attenuated_Scattering_Ratio_1064_steps",
+             "CumulativeTwoWayTransmittance_1064"),
+}
+
+def resolve_steps(value):
+    """Normalize the step selection to the string 'all' or a sorted index tuple."""
+    if isinstance(value, str):
+        keyword = value.strip().lower()
+        if keyword == "all":
+            return "all"
+        if keyword == "none":
+            return ()
+        raise ValueError("A textual step selection must be 'all' or 'none'")
+    if value is None:
+        return ()
+    if isinstance(value, int):
+        value = [value]
+    steps = sorted({int(step) for step in value})
+    if any(step < 0 for step in steps):
+        raise ValueError("Step numbers must be positive")
+    return tuple(steps)
+
+
+def resolve_channels(value):
+    """Normalize the channel selection to a tuple following the ALL_CHANNELS order."""
+    if isinstance(value, str) and value.strip().lower() == "all":
+        return ALL_CHANNELS
+    if value is None:
+        return ()
+    if isinstance(value, str):
+        value = [value]
+    channels = {str(channel).strip() for channel in value}
+    unknown = sorted(channels - set(ALL_CHANNELS))
+    if unknown:
+        raise ValueError(f"Unknown channels: {', '.join(unknown)}")
+    return tuple(channel for channel in ALL_CHANNELS if channel in channels)
+
+
+def read_variable(dataset, key, prof_min, prof_max, input_file_format, steps="all"):
+    """Read one variable, keeping only the requested profiles and steps.
+
+    Slicing the step axis at read time avoids loading the complete development
+    arrays, which weigh a few hundred megabytes each.
+    """
+    if input_file_format == "hdf":
+        data = dataset.get_data(key, prof_min, prof_max, 'profindex')
+        if steps != "all" and data.ndim == 3:
+            data = data[list(steps)]
+        return data
+
+    if key not in dataset.variables:
+        raise KeyError(f"Variable '{key}' not found in file '{dataset.filepath()}'")
+    variable = dataset.variables[key]
+    if "Flags" in key:
+        # 255 is a valid flag (candidate detection), not the fill value
+        variable.set_auto_mask(False)
+    variable_slice = [slice(None)] * variable.ndim
+    for axis, dimension in enumerate(variable.dimensions):
+        if dimension == "Profile_ID":
+            variable_slice[axis] = slice(prof_min, prof_max + 1)
+        elif dimension.startswith("Step") and steps != "all":
+            available = variable.shape[axis]
+            out_of_range = [step for step in steps if step >= available]
+            if out_of_range:
+                raise ValueError(
+                    f"Variable '{key}' has {available:d} steps; requested step(s) "
+                    f"{', '.join(str(step) for step in out_of_range)} do not exist")
+            variable_slice[axis] = list(steps)
+    return variable[tuple(variable_slice)]
+
 
 def load_yaml_configuration(config_path, required_keys):
     """Load one complete single-granule YAML configuration."""
@@ -121,6 +203,28 @@ def parse_arguments():
             f"{Path(__file__).stem}_single_granule.yaml"),
         help="Complete single-granule YAML configuration.",
     )
+    parser.add_argument(
+        "--step",
+        dest="steps",
+        type=int,
+        action="append",
+        metavar="N",
+        help="Plot only this step, overriding plot.steps. Repeatable.",
+    )
+    parser.add_argument(
+        "--channel",
+        dest="channels",
+        choices=ALL_CHANNELS,
+        action="append",
+        help="Plot only this channel, overriding plot.channels. Repeatable.",
+    )
+    parser.add_argument(
+        "--no-final",
+        dest="final",
+        action="store_false",
+        default=None,
+        help="Skip the channel and composite mask figures, overriding plot.final.",
+    )
     return parser.parse_args()
 
 
@@ -152,7 +256,7 @@ class FigureMaker(CALIOPFigureMaker):
                    "Likely artifact",
                    "Surface"]
 
-        if step:
+        if step is not None:
             clabels = clabels + ["Potential detection",]
 
         # Colormap
@@ -165,7 +269,7 @@ class FigureMaker(CALIOPFigureMaker):
         palette.append([1.0, 0.0, 0.0])  # 252 = Fully attenuated
         palette.append([0.8, 0.8, 0.8])  # 253 = Likely artifact
         palette.append([0.5, 0.0, 0.0])  # 254 = Surface
-        if step:
+        if step is not None:
             palette.append([1.0, 0.5, 0.0])  # 255 = Maybe
             last_flag_value = 255
         else:
@@ -186,9 +290,9 @@ class FigureMaker(CALIOPFigureMaker):
         ax0 = plt.subplot(gs0[0])
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        if step:
-            plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)\ %s}$' % (step, VERSION_2D_MCDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, txt_version=f"2D-McDA {VERSION_2D_MCDA}")
+        if step is not None:
+            plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)}$' % step, fontsize=self.axes_titlesize, y=self.axes_title_pad)
         else:
             if channel == '532_par':
                 title = r"532\ nm\ parallel\ detection\ feature\ mask"
@@ -198,7 +302,7 @@ class FigureMaker(CALIOPFigureMaker):
                 title = r"1064\ nm\ detection\ feature\ mask"
             else:
                 raise ValueError(f"Unknown channel = {channel}")
-            plt.title(r'$\mathbf{%s\ %s}$' % (title, VERSION_2D_MCDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+            plt.title(r'$\mathbf{%s}$' % title, fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -211,7 +315,7 @@ class FigureMaker(CALIOPFigureMaker):
         cbar.set_label("Level of detection", labelpad=80)
        
         # Save figure
-        if step:
+        if step is not None:
             filename = f"{channel}_step{step:d}"
         else:
             filename = f"mask_{channel}"
@@ -254,8 +358,8 @@ class FigureMaker(CALIOPFigureMaker):
         else:
             raise ValueError(f"Unknown channel = {channel}")
         plt.clim(1e-1, vmax)
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)\ %s}$' % (step, VERSION_2D_MCDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, txt_version=f"2D-McDA {VERSION_2D_MCDA}")
+        plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)}$' % step, fontsize=self.axes_titlesize, y=self.axes_title_pad)
         
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -272,18 +376,16 @@ class FigureMaker(CALIOPFigureMaker):
         plt.close(fig)
     
     
-    def plot_steps(self, mask, atsr, channel):
-    
-        # Get number of steps
-        nb_steps = mask.shape[0]
-    
-        for step in np.arange(nb_steps):
-    
+    def plot_steps(self, mask, atsr, channel, step_numbers):
+        """Plot the selected steps. step_numbers labels the first array axis."""
+
+        for index, step in enumerate(step_numbers):
+
             # Determine if it's a mask or atsr step
-            if not np.all(mask[step, :, :] == 0):
-                self.plot_mask(step, mask[step, :, :], channel)
-            if not atsr[step, :, :].mask.all():
-                self.plot_atsr(step, atsr[step, :, :], channel)
+            if not np.all(mask[index, :, :] == 0):
+                self.plot_mask(int(step), mask[index, :, :], channel)
+            if not np.ma.getmaskarray(atsr[index, :, :]).all():
+                self.plot_atsr(int(step), atsr[index, :, :], channel)
 
 
     def plot_twoway_transmittance(self, twoway_transmittance, channel):
@@ -369,8 +471,8 @@ class FigureMaker(CALIOPFigureMaker):
         ax0 = plt.subplot(gs0[0])
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_MCDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, txt_version=f"2D-McDA {VERSION_2D_MCDA}")
+        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask}$', fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -405,12 +507,18 @@ class FigureMaker(CALIOPFigureMaker):
                    'Fully Attenuated']
     
         # Colormap
-        cmaplist = ['1',
-                    "#fdac53",
-                    "#34568b",
-                    '0.6',
-                    (88./255., 41./255., 0./255.),
-                    (222./255., 41./255., 22./255.)]
+        # cmaplist = ['1',
+        #             "#fdac53",
+        #             "#34568b",
+        #             '0.6',
+        #             (88./255., 41./255., 0./255.),
+        #             (222./255., 41./255., 22./255.)]
+        cmaplist = ['#77B3FB',
+                    "#F3CF4F",
+                    "#FFFFF0",
+                    '#999999',
+                    '#322115',
+                    "#DC332A"]
         my_cmap = mpl.colors.ListedColormap(cmaplist)
         colorbins = np.array((0.5, 1.5, 2.25, 2.75, 3.5, 5.5, 7.5))
                     # 1: Clear air
@@ -432,8 +540,8 @@ class FigureMaker(CALIOPFigureMaker):
         ax0 = plt.subplot(gs0[0])
         pc = plt.pcolormesh(self.pindexbins, self.altbins, mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_MCDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, txt_version=f"2D-McDA {VERSION_2D_MCDA}")
+        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask}$', fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -520,8 +628,8 @@ class FigureMaker(CALIOPFigureMaker):
         ax0 = plt.subplot(gs0[0])
         pc = plt.pcolormesh(self.pindexbins, self.altbins, new_mask.T, cmap=my_cmap,
                             norm=my_norm, rasterized=True)
-        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS)
-        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask\ %s}$' % VERSION_2D_MCDA, fontsize=self.axes_titlesize, y=self.axes_title_pad)
+        self.plot_params(ax0, YMIN, YMAX, INVERT_XAXIS, txt_version=f"2D-McDA {VERSION_2D_MCDA}")
+        plt.title(r'$\mathbf{Composite\ detection\ feature\ mask}$', fontsize=self.axes_titlesize, y=self.axes_title_pad)
     
         # Plot colorbar
         ax1 = plt.subplot(gs0[1])
@@ -548,12 +656,23 @@ if __name__ == '__main__':
         args.configuration,
         {
             "INDATA_FOLDER", "VERSION_2D_MCDA", "TYPE_2D_MCDA", "INPUT_FILE_FORMAT",
-            "EDGES_REMOVAL", "MAX_DETECT_LEVEL", "PLOT_ALL_STEPS", "INVERT_XAXIS",
-            "YMIN", "YMAX", "BROWSE_IMAGE_ASPECT_RATIO", "FIGURES_PATH",
+            "EDGES_REMOVAL", "MAX_DETECT_LEVEL", "STEPS", "CHANNELS", "FINAL",
+            "INVERT_XAXIS", "YMIN", "YMAX", "BROWSE_IMAGE_ASPECT_RATIO",
+            "FIGURES_PATH",
         },
     ))
 
-    
+    # Command-line overrides, for a quick look at one step without editing the
+    # configuration.
+    selected_steps = resolve_steps(args.steps if args.steps else STEPS)
+    selected_channels = resolve_channels(args.channels if args.channels else CHANNELS)
+    plot_final_masks = FINAL if args.final is None else args.final
+    plot_step_figures = bool(selected_steps) and bool(selected_channels)
+    # The two-way transmittances belong to no particular step, so they are only
+    # plotted when every step is requested.
+    plot_transmittance = plot_step_figures and selected_steps == "all"
+
+
     # *******************************
     # *** Load 2D-McDA data file ***
     input_file_format = INPUT_FILE_FORMAT.lower()
@@ -616,62 +735,37 @@ if __name__ == '__main__':
         "Composite_Detection_Flags"
     ]
     for key in cal_2d_mcda_keys:
-        if input_file_format == "hdf":
-            data = cal_2d_mcda.get_data(key, prof_min, prof_max, 'profindex')
-        else:
-            if key not in cal_2d_mcda.variables:
-                raise KeyError(f"Variable '{key}' not found in file '{datafile}'")
-            variable = cal_2d_mcda.variables[key]
-            variable_slice = [slice(None)] * variable.ndim
-            if "Profile_ID" in variable.dimensions:
-                profile_axis = variable.dimensions.index("Profile_ID")
-                variable_slice[profile_axis] = slice(prof_min, prof_max + 1)
-            data = variable[tuple(variable_slice)]
-        data_dict_cal_2d_mcda[key] = data
-    
+        data_dict_cal_2d_mcda[key] = read_variable(
+            cal_2d_mcda, key, prof_min, prof_max, input_file_format)
+
+    # Development data: only the requested channels and steps are read, since a
+    # single step array holds the complete granule section for every step.
     data_dict_cal_2d_mcda_steps = {}
-    if PLOT_ALL_STEPS:
-        cal_2d_mcda_steps_keys = [
-            "Parallel_Detection_Flags_532_steps",
-            "Perpendicular_Detection_Flags_532_steps",
-            "Detection_Flags_1064_steps",
-            "Parallel_Attenuated_Scattering_Ratio_532_steps",
-            "Perpendicular_Attenuated_Scattering_Ratio_532_steps",
-            "Attenuated_Scattering_Ratio_1064_steps",
-            "Parallel_CumulativeTwoWayTransmittance_532",
-            "Perpendicular_CumulativeTwoWayTransmittance_532",
-            "CumulativeTwoWayTransmittance_1064"
-        ]
-        for key in cal_2d_mcda_steps_keys:
-            if input_file_format == "hdf":
-                data = cal_2d_mcda.get_data(key, prof_min, prof_max, 'profindex')
+    step_numbers = {}
+    if plot_step_figures:
+        for channel in selected_channels:
+            mask_key, atsr_key, transmittance_key = STEP_VARIABLES[channel]
+            for key in (mask_key, atsr_key):
+                data_dict_cal_2d_mcda_steps[key] = read_variable(
+                    cal_2d_mcda, key, prof_min, prof_max, input_file_format,
+                    steps=selected_steps)
+            if selected_steps == "all":
+                step_numbers[channel] = np.arange(
+                    data_dict_cal_2d_mcda_steps[mask_key].shape[0])
             else:
-                if key not in cal_2d_mcda.variables:
-                    raise KeyError(f"Variable '{key}' not found in file '{datafile}'")
-                variable = cal_2d_mcda.variables[key]
-                variable_slice = [slice(None)] * variable.ndim
-                if "Profile_ID" in variable.dimensions:
-                    profile_axis = variable.dimensions.index("Profile_ID")
-                    variable_slice[profile_axis] = slice(prof_min, prof_max + 1)
-                data = variable[tuple(variable_slice)]
-            data_dict_cal_2d_mcda_steps[key] = data
+                step_numbers[channel] = np.asarray(selected_steps)
+            if plot_transmittance:
+                data_dict_cal_2d_mcda_steps[transmittance_key] = read_variable(
+                    cal_2d_mcda, transmittance_key, prof_min, prof_max,
+                    input_file_format)
+        steps_label = ("all" if selected_steps == "all"
+                       else ", ".join(str(step) for step in selected_steps))
+        print(f"\tSteps plotted: {steps_label} "
+              f"— channels: {', '.join(selected_channels)}")
 
     if input_file_format == "netcdf":
         cal_2d_mcda.close()
-    
-    # Weak/Strong feature mask
-    mask_weak_strong = np.bitwise_and(data_dict_cal_2d_mcda["Composite_Detection_Flags"], 7).astype(float)
-    # 2.5 = 'Strong' were detection without averaging at least in one channel,
-    # keep 2 = 'Weak' elsewhere
-    where_strong = ((data_dict_cal_2d_mcda["Parallel_Detection_Flags_532"] >= 1) &
-                    (data_dict_cal_2d_mcda["Parallel_Detection_Flags_532"] <= 4)) |\
-                   ((data_dict_cal_2d_mcda["Perpendicular_Detection_Flags_532"] >= 1) &
-                    (data_dict_cal_2d_mcda["Perpendicular_Detection_Flags_532"] <= 4)) |\
-                   ((data_dict_cal_2d_mcda["Detection_Flags_1064"] >= 1) &
-                    (data_dict_cal_2d_mcda["Detection_Flags_1064"] <= 4))
-    mask_weak_strong[where_strong] = 2.5
-    
-    
+
     # ************
     # *** Plot ***
     print("\n\n*****Plot...*****")
@@ -692,31 +786,40 @@ if __name__ == '__main__':
     plot_fig.set_coordinates(data_dict_cal_2d_mcda["Latitude"],data_dict_cal_2d_mcda["Longitude"],
                              data_dict_cal_2d_mcda["Altitude"])
     
-    # Plot the 3 channel masks
-    plot_fig.plot_mask(None, data_dict_cal_2d_mcda["Parallel_Detection_Flags_532"], '532_par')
-    plot_fig.plot_mask(None, data_dict_cal_2d_mcda["Perpendicular_Detection_Flags_532"], '532_per')
-    plot_fig.plot_mask(None, data_dict_cal_2d_mcda["Detection_Flags_1064"], '1064')
+    if plot_final_masks:
+        # Weak/Strong feature mask
+        mask_weak_strong = np.bitwise_and(data_dict_cal_2d_mcda["Composite_Detection_Flags"], 7).astype(float)
+        # 2.5 = 'Strong' were detection without averaging at least in one channel,
+        # keep 2 = 'Weak' elsewhere
+        where_strong = ((data_dict_cal_2d_mcda["Parallel_Detection_Flags_532"] >= 1) &
+                        (data_dict_cal_2d_mcda["Parallel_Detection_Flags_532"] <= 4)) |\
+                       ((data_dict_cal_2d_mcda["Perpendicular_Detection_Flags_532"] >= 1) &
+                        (data_dict_cal_2d_mcda["Perpendicular_Detection_Flags_532"] <= 4)) |\
+                       ((data_dict_cal_2d_mcda["Detection_Flags_1064"] >= 1) &
+                        (data_dict_cal_2d_mcda["Detection_Flags_1064"] <= 4))
+        mask_weak_strong[where_strong] = 2.5
 
-    # Plot the composite masks
-    plot_fig.plot_composite_mask(data_dict_cal_2d_mcda["Composite_Detection_Flags"])
-    plot_fig.plot_composite_mask_strong_weak(mask_weak_strong)
-    plot_fig.plot_composite_mask_channel(data_dict_cal_2d_mcda["Composite_Detection_Flags"])
-    
-    # Plot every steps
-    if PLOT_ALL_STEPS:
-        plot_fig.plot_steps(data_dict_cal_2d_mcda_steps["Parallel_Detection_Flags_532_steps"],
-                   data_dict_cal_2d_mcda_steps["Parallel_Attenuated_Scattering_Ratio_532_steps"],
-                   '532_par')
-        plot_fig.plot_steps(data_dict_cal_2d_mcda_steps["Perpendicular_Detection_Flags_532_steps"],
-                   data_dict_cal_2d_mcda_steps["Perpendicular_Attenuated_Scattering_Ratio_532_steps"],
-                   '532_per')
-        plot_fig.plot_steps(data_dict_cal_2d_mcda_steps["Detection_Flags_1064_steps"],
-                   data_dict_cal_2d_mcda_steps["Attenuated_Scattering_Ratio_1064_steps"],
-                   '1064')
-    if PLOT_ALL_STEPS:
-        plot_fig.plot_twoway_transmittance(data_dict_cal_2d_mcda_steps["Parallel_CumulativeTwoWayTransmittance_532"], '532_par')
-        plot_fig.plot_twoway_transmittance(data_dict_cal_2d_mcda_steps["Perpendicular_CumulativeTwoWayTransmittance_532"], '532_per')
-        plot_fig.plot_twoway_transmittance(data_dict_cal_2d_mcda_steps["CumulativeTwoWayTransmittance_1064"], '1064')
-    
+        # Plot the 3 channel masks
+        plot_fig.plot_mask(None, data_dict_cal_2d_mcda["Parallel_Detection_Flags_532"], '532_par')
+        plot_fig.plot_mask(None, data_dict_cal_2d_mcda["Perpendicular_Detection_Flags_532"], '532_per')
+        plot_fig.plot_mask(None, data_dict_cal_2d_mcda["Detection_Flags_1064"], '1064')
+
+        # Plot the composite masks
+        plot_fig.plot_composite_mask(data_dict_cal_2d_mcda["Composite_Detection_Flags"])
+        plot_fig.plot_composite_mask_strong_weak(mask_weak_strong)
+        plot_fig.plot_composite_mask_channel(data_dict_cal_2d_mcda["Composite_Detection_Flags"])
+
+    # Plot the selected steps of the selected channels
+    if plot_step_figures:
+        for channel in selected_channels:
+            mask_key, atsr_key, transmittance_key = STEP_VARIABLES[channel]
+            plot_fig.plot_steps(data_dict_cal_2d_mcda_steps[mask_key],
+                                data_dict_cal_2d_mcda_steps[atsr_key],
+                                channel,
+                                step_numbers[channel])
+            if plot_transmittance:
+                plot_fig.plot_twoway_transmittance(
+                    data_dict_cal_2d_mcda_steps[transmittance_key], channel)
+
     
     print_time(tic_main_program)

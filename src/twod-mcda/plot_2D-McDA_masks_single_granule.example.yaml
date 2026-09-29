@@ -23,6 +23,11 @@ plot:
   ymax: 20
   browse_image_aspect_ratio: true
   figures_path: out/figures
-
-flags:
-  plot_all_steps: false
+  # Steps to plot: all, none, or a list such as [12, 17]. Selecting a few steps
+  # avoids reading the complete development arrays, which weigh a few hundred
+  # megabytes each. The two-way transmittances are plotted only with all.
+  steps: none
+  # Channels of the step figures: all, or a list among 532_par, 532_per, 1064.
+  channels: all
+  # Channel and composite mask figures.
+  final: true
