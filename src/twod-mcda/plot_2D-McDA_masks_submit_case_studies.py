@@ -5,6 +5,7 @@ import argparse
 import copy
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 from collections.abc import Mapping
@@ -75,6 +76,8 @@ def single_case_configuration(batch, case):
         "end": case["end"],
         "name": case["name"],
     }
+    if case.get("file_section"):
+        configuration["case"]["file_section"] = str(case["file_section"])
     return {"case": configuration.pop("case"), **configuration}
 
 
@@ -104,18 +107,38 @@ def submit_case(case, configuration_path):
         f"{case['start']}_{case['end']}"
     )
     log_dir = PROJECT_ROOT / "out" / "slurm"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    job_script = SCRIPT_DIR / "plot_2D-McDA_masks.sbatch"
+    python_script = SCRIPT_DIR / "plot_2D-McDA_masks.py"
+    sbatch_command = os.environ.get("SBATCH_COMMAND", "sbatch")
+
+    # Without Slurm (e.g. local PC), run the job script directly, one case after another.
+    if shutil.which(sbatch_command) is None:
+        print(f"{sbatch_command} not found: running {job_name} locally "
+              f"(logs in {log_dir})")
+        env = dict(os.environ, CONFIG_FILE=str(configuration_path),
+                   REMOVE_CONFIG_AFTER_RUN="1", PYTHON_SCRIPT=str(python_script))
+        with open(log_dir / f"{job_name}.o", "w") as out, \
+                open(log_dir / f"{job_name}.e", "w") as err:
+            result = subprocess.run(["bash", str(job_script)], env=env,
+                                    stdout=out, stderr=err)
+        if result.returncode != 0:
+            print(f"  -> {job_name} failed (exit code {result.returncode}), "
+                  f"see {log_dir / (job_name + '.e')}")
+        return
+
     export = (
         f"ALL,CONFIG_FILE={configuration_path},"
         "REMOVE_CONFIG_AFTER_RUN=1,"
-        f"PYTHON_SCRIPT={SCRIPT_DIR / 'plot_2D-McDA_masks.py'}"
+        f"PYTHON_SCRIPT={python_script}"
     )
     command = [
-        os.environ.get("SBATCH_COMMAND", "sbatch"),
+        sbatch_command,
         f"--job-name={job_name}",
         f"--error={log_dir / (job_name + '.e')}",
         f"--output={log_dir / (job_name + '.o')}",
         f"--export={export}",
-        str(SCRIPT_DIR / "plot_2D-McDA_masks.sbatch"),
+        str(job_script),
     ]
     print(f"Submitting {job_name} with {configuration_path}")
     try:

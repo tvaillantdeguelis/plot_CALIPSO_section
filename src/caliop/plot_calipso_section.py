@@ -81,13 +81,15 @@ def load_yaml_configuration(config_path, required_keys):
     if unknown:
         raise ValueError(f"Unknown configuration keys: {', '.join(unknown)}")
 
-    slice_start = float(case["start"])
-    slice_end = float(case["end"])
+    # A null limit means the first/last profile of the granule.
+    slice_start = None if case["start"] is None else float(case["start"])
+    slice_end = None if case["end"] is None else float(case["end"])
     if case["mode"] == "profindex":
-        if not slice_start.is_integer() or not slice_end.is_integer():
+        if any(limit is not None and not limit.is_integer()
+               for limit in (slice_start, slice_end)):
             raise ValueError("Profile-index limits must be integers")
-        slice_start = int(slice_start)
-        slice_end = int(slice_end)
+        slice_start = None if slice_start is None else int(slice_start)
+        slice_end = None if slice_end is None else int(slice_end)
 
     flattened.update(
         GRANULE_DATE=str(case["granule"]),
@@ -95,8 +97,6 @@ def load_yaml_configuration(config_path, required_keys):
         SLICE_START=slice_start,
         SLICE_END=slice_end,
         CASE_STUDY_NAME=case.get("name"),
-        SLICE_START_TEXT=str(case["start"]),
-        SLICE_END_TEXT=str(case["end"]),
     )
     for key in ("FOLDER_PATH", "FIGURES_PATH"):
         value = flattened.get(key)
@@ -110,7 +110,8 @@ def parse_arguments():
     parser.add_argument(
         "configuration",
         nargs="?",
-        default=Path(__file__).with_suffix(".yaml"),
+        default=Path(__file__).with_name(
+            f"{Path(__file__).stem}_single_granule.yaml"),
         help="Complete single-granule YAML configuration.",
     )
     return parser.parse_args()
@@ -4304,6 +4305,10 @@ if __name__ == '__main__':
     vfm = np.copy(data_dict_cal_lid_l2_vfm["Feature_Classification_Flags"])
     vfm[vfm==FILL_VALUE_FLOAT] = 0
     vfm = vfm.astype('uint16')
+    # The VFM (5 km blocks) misses the last L1 profiles of the granule: pad with 0 (invalid)
+    nb_missing_profiles = cal_l1[REGULAR_GRIDS[0]].nb_profiles - vfm.shape[0]
+    if nb_missing_profiles > 0:
+        vfm = np.pad(vfm, ((0, nb_missing_profiles), (0, 0)))
     vfm_type = np.bitwise_and(vfm, 7) # Bits 1-16 & 111 = Bits 1-3
     vfm_ha = vfm >> 13 # Bits 14-16 >> Bits 1-3
     vfm_phase = np.bitwise_and(vfm >> 5, 3) # Bits 6-16 >> Bits 1-11 & 11 = Bits 6-7

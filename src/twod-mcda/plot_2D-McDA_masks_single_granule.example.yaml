@@ -1,9 +1,13 @@
 case:
   granule: 2007-04-10T04-21-17ZN
   mode: longitude  # longitude or profindex
+  # start/end: null = first/last profile of the file read
   start: -15.34
   end: -39.11
   name: "Cloud chaos: HOI ROI H2O"
+  # Optional: suffix of a 2D-McDA section file (e.g. _lon_62.70_61.30);
+  # leave empty to read the full granule. start/end always define the plotted limits.
+  file_section:
 
 data:
   indata_folder: /home/vaillant/codes/projects/2D-McDA/data/output

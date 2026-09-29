@@ -52,7 +52,7 @@ def load_yaml_configuration(config_path, required_keys):
 
     required_case_keys = {"granule", "mode", "start", "end"}
     missing_case_keys = sorted(required_case_keys - case.keys())
-    unknown_case_keys = sorted(case.keys() - required_case_keys - {"name"})
+    unknown_case_keys = sorted(case.keys() - required_case_keys - {"name", "file_section"})
     if missing_case_keys:
         raise ValueError(f"Missing case keys: {', '.join(missing_case_keys)}")
     if unknown_case_keys:
@@ -81,22 +81,29 @@ def load_yaml_configuration(config_path, required_keys):
     if unknown:
         raise ValueError(f"Unknown configuration keys: {', '.join(unknown)}")
 
-    slice_start = float(case["start"])
-    slice_end = float(case["end"])
+    # A null limit means the first/last profile of the file read.
+    slice_start = None if case["start"] is None else float(case["start"])
+    slice_end = None if case["end"] is None else float(case["end"])
     if case["mode"] == "profindex":
-        if not slice_start.is_integer() or not slice_end.is_integer():
+        if any(limit is not None and not limit.is_integer()
+               for limit in (slice_start, slice_end)):
             raise ValueError("Profile-index limits must be integers")
-        slice_start = int(slice_start)
-        slice_end = int(slice_end)
+        slice_start = None if slice_start is None else int(slice_start)
+        slice_end = None if slice_end is None else int(slice_end)
+
+    # Optional filename suffix of a 2D-McDA section file (e.g. _lon_62.70_61.30);
+    # empty to read the complete granule file.
+    file_section = str(case.get("file_section") or "").strip()
+    if file_section and not file_section.startswith("_"):
+        file_section = f"_{file_section}"
 
     flattened.update(
         GRANULE_DATE=str(case["granule"]),
+        GRANULE_SECTION=file_section,
         SLICE_START_END_TYPE=str(case["mode"]),
         SLICE_START=slice_start,
         SLICE_END=slice_end,
         CASE_STUDY_NAME=case.get("name"),
-        SLICE_START_TEXT=str(case["start"]),
-        SLICE_END_TEXT=str(case["end"]),
     )
     for key in ("INDATA_FOLDER", "FIGURES_PATH"):
         value = flattened.get(key)
@@ -110,7 +117,8 @@ def parse_arguments():
     parser.add_argument(
         "configuration",
         nargs="?",
-        default=Path(__file__).with_suffix(".yaml"),
+        default=Path(__file__).with_name(
+            f"{Path(__file__).stem}_single_granule.yaml"),
         help="Complete single-granule YAML configuration.",
     )
     return parser.parse_args()
@@ -183,11 +191,11 @@ class FigureMaker(CALIOPFigureMaker):
             plt.title(r'$\mathbf{Detection\ feature\ (step\ \#%d)\ %s}$' % (step, VERSION_2D_MCDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
         else:
             if channel == '532_par':
-                title = "532\ nm\ parallel\ detection\ feature\ mask"
+                title = r"532\ nm\ parallel\ detection\ feature\ mask"
             elif channel == '532_per':
-                title = "532\ nm\ perpendicular\ detection\ feature\ mask"
+                title = r"532\ nm\ perpendicular\ detection\ feature\ mask"
             elif channel == '1064':
-                title = "1064\ nm\ detection\ feature\ mask"
+                title = r"1064\ nm\ detection\ feature\ mask"
             else:
                 raise ValueError(f"Unknown channel = {channel}")
             plt.title(r'$\mathbf{%s\ %s}$' % (title, VERSION_2D_MCDA), fontsize=self.axes_titlesize, y=self.axes_title_pad)
@@ -544,8 +552,7 @@ if __name__ == '__main__':
             "YMIN", "YMAX", "BROWSE_IMAGE_ASPECT_RATIO", "FIGURES_PATH",
         },
     ))
-    GRANULE_SECTION = f"_lon_{SLICE_START_TEXT}_{SLICE_END_TEXT}"
-    
+
     
     # *******************************
     # *** Load 2D-McDA data file ***
@@ -581,12 +588,12 @@ if __name__ == '__main__':
         lat_granule = cal_2d_mcda.variables["Latitude"][:]
         lon_granule = cal_2d_mcda.variables["Longitude"][:]
 
-    # Get prof_min and prof_max from longitudes
+    # Get prof_min and prof_max (null limits = first/last profile of the file)
     if SLICE_START_END_TYPE == 'longitude':
         prof_min, prof_max = get_prof_min_max_indexes_from_lon(lon_granule, SLICE_START, SLICE_END)
     else:
-        prof_min = SLICE_START
-        prof_max = SLICE_END
+        prof_min = 0 if SLICE_START is None else SLICE_START
+        prof_max = lon_granule.size - 1 if SLICE_END is None else SLICE_END
         
     # Print lat/lon of min and max prof indices
     print(f"\tFrom min profile index {prof_min:d} "
@@ -610,8 +617,7 @@ if __name__ == '__main__':
     ]
     for key in cal_2d_mcda_keys:
         if input_file_format == "hdf":
-            data = cal_2d_mcda.get_data(key, SLICE_START, SLICE_END,
-                                        SLICE_START_END_TYPE)
+            data = cal_2d_mcda.get_data(key, prof_min, prof_max, 'profindex')
         else:
             if key not in cal_2d_mcda.variables:
                 raise KeyError(f"Variable '{key}' not found in file '{datafile}'")
@@ -638,8 +644,7 @@ if __name__ == '__main__':
         ]
         for key in cal_2d_mcda_steps_keys:
             if input_file_format == "hdf":
-                data = cal_2d_mcda.get_data(key, SLICE_START, SLICE_END,
-                                            SLICE_START_END_TYPE)
+                data = cal_2d_mcda.get_data(key, prof_min, prof_max, 'profindex')
             else:
                 if key not in cal_2d_mcda.variables:
                     raise KeyError(f"Variable '{key}' not found in file '{datafile}'")

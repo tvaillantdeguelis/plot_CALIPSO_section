@@ -21,7 +21,7 @@ conda activate "${CONDA_ENV:?CONDA_ENV must name the conda environment}"
 
 # Run program
 : "${CONFIG_FILE:?CONFIG_FILE must point to a complete YAML configuration}"
-: "${PYTHON_SCRIPT:?PYTHON_SCRIPT must point to plot_calipso_section.py}"
+: "${PYTHON_SCRIPT:?PYTHON_SCRIPT must point to plot_2D-McDA_masks.py}"
 
 cleanup_config() {
     if [[ "${REMOVE_CONFIG_AFTER_RUN:-0}" == "1" ]]; then
